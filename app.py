@@ -1,46 +1,25 @@
 import random
+from datetime import date
 from pathlib import Path
 
-from flask import Flask, url_for
+from flask import Flask, send_file
 
 app = Flask(__name__)
 
 IMAGE_DIR = Path("static/images")
-IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
 
 
-@app.route("/")
-def index():
-    images = [
-        file.name
-        for file in IMAGE_DIR.iterdir()
-        if file.suffix.lower() in IMAGE_EXTENSIONS
-    ]
+def get_daily_image():
+    images = list(IMAGE_DIR.glob("*.jpg"))
+    seed = date.today().isoformat()
+    rng = random.Random(seed)
+    return rng.choice(images)
 
-    if not images:
-        return "<h1>No images found.</h1>"
 
-    image = random.choice(images)
-
-    image_url = url_for("static", filename=f"images/{image}")
-
-    return f"""
-    <html>
-    <body style="
-        margin:0;
-        display:flex;
-        justify-content:center;
-        align-items:center;
-        height:100vh;
-        background:#111;
-    ">
-        <img
-            src="{image_url}"
-            style="max-width:95%; max-height:95%;"
-        >
-    </body>
-    </html>
-    """
+@app.route("/daily")
+def daily():
+    image = get_daily_image()
+    return send_file(image, mimetype="image/jpeg")
 
 
 if __name__ == "__main__":
