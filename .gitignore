@@ -220,4 +220,5 @@ __marimo__/
 .streamlit/secrets.toml
 
 # Own stuff
-static/images/
+static/images/*
+!static/images/default.jpg
