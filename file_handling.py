@@ -20,7 +20,11 @@ def check_cache() -> list:
 
     now = datetime.now()
     if _cached_image_list is None or (now - _cache_time) > config.CACHE_TTL:
-        _cached_image_list = list(config.IMAGE_DIR.glob("*.jpg"))
+        _cached_image_list = [
+            path
+            for path in config.IMAGE_DIR.glob("*.jpg")
+            if path != config.DEFAULT_IMAGE
+        ]
         _cache_time = now
 
     return _cached_image_list

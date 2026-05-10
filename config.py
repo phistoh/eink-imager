@@ -9,8 +9,7 @@ BASE_DIR = Path(__file__).parent
 
 # Image
 IMAGE_DIR = BASE_DIR / "static/images"
-DEFAULT_IMAGE = BASE_DIR / "static/default.jpg"
+DEFAULT_IMAGE = BASE_DIR / "static/images/default.jpg"
 
 # Caching
 CACHE_TTL = timedelta(hours=24)
-DEFAULT_IMAGE = Path("static/default.jpg")
