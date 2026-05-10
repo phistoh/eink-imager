@@ -13,3 +13,7 @@ DEFAULT_IMAGE = BASE_DIR / "static/images/default.jpg"
 
 # Caching
 CACHE_TTL = timedelta(hours=24)
+
+# File handling
+WATCH_DIR = BASE_DIR / Path("test/incoming")
+PROCESSED_DIR = Path("test/processed")

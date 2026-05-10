@@ -2,7 +2,6 @@ import random
 from datetime import date
 from pathlib import Path
 
-import config
 from file_handling import get_image_paths
 
 
