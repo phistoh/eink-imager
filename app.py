@@ -1,10 +1,7 @@
-import threading
-
 from flask import Flask, Response, send_from_directory
 
 import config
 from file_handling import check_cache, invalidate_cache, send_image
-from file_watcher import start_watcher
 from images import get_daily_image, get_random_image
 
 app = Flask(__name__)
@@ -40,6 +37,4 @@ def random_image_without_cache() -> Response:
 
 if __name__ == "__main__":
     check_cache()
-    watcher_thread = threading.Thread(target=start_watcher, daemon=True)
-    watcher_thread.start()
     app.run()

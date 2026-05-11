@@ -60,6 +60,7 @@ def worker():
         path = image_queue.get()
 
         try:
+            print(f"Processing: {path}")
             process_file(path)
         except Exception as e:
             print(f"Failed processing {path}: {e}")
@@ -72,10 +73,25 @@ def process_existing_files() -> None:
         image_queue.put(path)
 
 
-def start_watcher():
+if __name__ == "__main__":
+    config.PROCESSED_DIR.mkdir(exist_ok=True)
+
     process_existing_files()
+
+    threading.Thread(target=worker, daemon=True).start()
+
     observer = Observer()
     observer.schedule(ImageHandler(), str(config.WATCH_DIR), recursive=False)
     observer.start()
 
-    threading.Thread(target=worker, daemon=True).start()
+    print("Watcher started")
+
+    try:
+        while True:
+            time.sleep(1)
+
+    except KeyboardInterrupt:
+        print("Stopping watcher...")
+        observer.stop()
+
+    observer.join()
