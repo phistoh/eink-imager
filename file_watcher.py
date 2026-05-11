@@ -1,3 +1,4 @@
+import logging
 import shutil
 import threading
 import time
@@ -10,11 +11,13 @@ from watchdog.observers import Observer
 
 import config
 
-image_queue = Queue()
+logger = logging.getLogger(__name__)
+image_queue: Queue[Path] = Queue()
 
 
-def wait_until_complete(path: Path) -> None:
+def wait_until_complete(path: Path, timeout: int = 60) -> None:
     previous_size = -1
+    start_time = time.monotonic()
 
     while True:
         try:
@@ -29,17 +32,21 @@ def wait_until_complete(path: Path) -> None:
         previous_size = current_size
         time.sleep(1)
 
+        if time.monotonic() - start_time > timeout:
+            raise TimeoutError(f"Timed out waiting for {path}")
+
 
 def process_file(path: Path) -> None:
     if not path.exists():
         return
+
     wait_until_complete(path)
 
     # TODO process image
-    print(path)
 
     destination = config.PROCESSED_DIR / f"{uuid.uuid4().hex}{path.suffix}"
     shutil.move(path, destination)
+    logger.info("Moved processed file to %s", destination)
 
 
 class ImageHandler(FileSystemEventHandler):
@@ -52,6 +59,7 @@ class ImageHandler(FileSystemEventHandler):
         if path.suffix.lower() != ".jpg":
             return
 
+        logger.info("Queued file: %s", path)
         image_queue.put(path)
 
 
@@ -60,38 +68,47 @@ def worker():
         path = image_queue.get()
 
         try:
-            print(f"Processing: {path}")
+            logger.info("Processing file: %s", path)
             process_file(path)
-        except Exception as e:
-            print(f"Failed processing {path}: {e}")
+        except Exception:
+            logger.exception("Failed processing %s", path)
 
         image_queue.task_done()
 
 
 def process_existing_files() -> None:
     for path in sorted(config.WATCH_DIR.glob("*.jpg")):
+        logger.info("Queued file: %s", path)
         image_queue.put(path)
 
 
 if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    )
+
     config.PROCESSED_DIR.mkdir(exist_ok=True)
 
-    process_existing_files()
+    threading.Thread(
+        target=worker,
+        daemon=True,
+        name="file-watcher",
+    ).start()
 
-    threading.Thread(target=worker, daemon=True).start()
+    process_existing_files()
 
     observer = Observer()
     observer.schedule(ImageHandler(), str(config.WATCH_DIR), recursive=False)
     observer.start()
 
-    print("Watcher started")
+    logger.info("Watcher started")
 
     try:
         while True:
             time.sleep(1)
 
     except KeyboardInterrupt:
-        print("Stopping watcher...")
+        logger.info("Stopping watcher...")
         observer.stop()
-
-    observer.join()
+        observer.join()
