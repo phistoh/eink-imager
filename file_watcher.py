@@ -10,6 +10,7 @@ from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 import config
+from image_processing import resize_image, validate_image
 
 logger = logging.getLogger(__name__)
 image_queue: Queue[Path] = Queue()
@@ -42,9 +43,22 @@ def process_file(path: Path) -> None:
 
     wait_until_complete(path)
 
-    # TODO process image
+    new_file_name = f"{uuid.uuid4().hex}{path.suffix}"
 
-    destination = config.PROCESSED_DIR / f"{uuid.uuid4().hex}{path.suffix}"
+    valid_image, reason = validate_image(path)
+
+    if not valid_image:
+        logger.info("Skipping %s (%s)", path, reason)
+        shutil.move(path, config.FAILED_DIR / new_file_name)
+        return
+
+    resize_image(
+        source=path,
+        destination=config.IMAGE_DIR / new_file_name,
+        size=(800, 480),
+    )
+
+    destination = config.PROCESSED_DIR / new_file_name
     shutil.move(path, destination)
     logger.info("Moved processed file to %s", destination)
 

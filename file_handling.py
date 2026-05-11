@@ -1,10 +1,13 @@
 import hashlib
+import logging
 from datetime import datetime
 from pathlib import Path
 
 from flask import send_from_directory
 
 import config
+
+logger = logging.getLogger(__name__)
 
 _cached_image_list = None
 _cache_time = None

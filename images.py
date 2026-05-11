@@ -1,8 +1,11 @@
+import logging
 import random
 from datetime import date
 from pathlib import Path
 
 from file_handling import get_image_paths
+
+logger = logging.getLogger(__name__)
 
 
 def get_daily_image() -> Path:

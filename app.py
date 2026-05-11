@@ -1,9 +1,12 @@
+import logging
+
 from flask import Flask, Response, send_from_directory
 
 import config
 from file_handling import check_cache, invalidate_cache, send_image
 from images import get_daily_image, get_random_image
 
+logger = logging.getLogger(__name__)
 app = Flask(__name__)
 
 

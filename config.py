@@ -17,3 +17,4 @@ CACHE_TTL = timedelta(hours=24)
 # File handling
 WATCH_DIR = BASE_DIR / Path("test/incoming")
 PROCESSED_DIR = Path("test/processed")
+FAILED_DIR = Path("test/failed")
