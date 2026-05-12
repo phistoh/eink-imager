@@ -10,7 +10,7 @@ from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 import config
-from image_processing import resize_image, validate_image
+from image_processing import process_image, validate_image
 
 logger = logging.getLogger(__name__)
 image_queue: Queue[Path] = Queue()
@@ -52,7 +52,7 @@ def process_file(path: Path) -> None:
         shutil.move(path, config.FAILED_DIR / new_file_name)
         return
 
-    resize_image(
+    process_image(
         source=path,
         destination=config.IMAGE_DIR / new_file_name,
         size=(800, 480),

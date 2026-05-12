@@ -10,6 +10,9 @@ BASE_DIR = Path(__file__).parent
 # Image
 IMAGE_DIR = BASE_DIR / "static/images"
 DEFAULT_IMAGE = BASE_DIR / "static/images/default.jpg"
+CONTRAST = 1.3
+SATURATION = 1.15
+SHARPNESS = 1.1
 
 # Caching
 CACHE_TTL = timedelta(hours=24)
