@@ -28,6 +28,8 @@ def daily_image() -> Path:
         return path
 
     images = get_image_paths()
+    if not images:
+        return CONFIG.images.default_image
     chosen = choose_image(images, today)
     set_daily_image(chosen.stem, today.isoformat())
 

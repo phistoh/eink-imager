@@ -45,15 +45,13 @@ def generate_etag(image: Path) -> str:
 
 def get_image_paths() -> list[Path]:
     images = check_cache()
-    return images or [CONFIG.images.default_image]
+    return images
 
 
-def get_image_path_by_id(id) -> Path:
-    return CONFIG.paths.image_dir / id / ".jpg"
+def get_image_path_by_id(image_id) -> Path:
+    return CONFIG.paths.image_dir / image_id / ".jpg"
 
 
 def send_image(image: Path):
     etag = generate_etag(image)
-    return send_from_directory(
-        CONFIG.paths.image_dir, image.name, conditional=True, etag=etag
-    )
+    return send_from_directory(image.parent, image.name, conditional=True, etag=etag)

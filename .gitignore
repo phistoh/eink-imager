@@ -221,7 +221,6 @@ __marimo__/
 
 # Own stuff
 static/images/*
-!static/images/default.jpg
 test/
 .pylintrc
 launch.json
