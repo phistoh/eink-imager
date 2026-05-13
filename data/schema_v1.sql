@@ -22,8 +22,9 @@ CREATE TABLE IF NOT EXISTS displays(
 );
 
 CREATE TABLE IF NOT EXISTS daily_state(
-  date TEXT PRIMARY KEY,
-  image_id TEXT NOT NULL
+  date TEXT NOT NULL,
+  image_id TEXT NOT NULL,
+  PRIMARY KEY(date, image_id)
 );
 
 CREATE INDEX IF NOT EXISTS idx_displays_image_id ON displays (image_id);

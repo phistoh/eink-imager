@@ -5,33 +5,25 @@ from datetime import date
 from pathlib import Path
 
 from app.confparser import CONFIG
-from app.file_handling import get_image_path_by_id, get_image_paths
-from app.metadata import (
-    get_daily_image,
-    get_display_count,
-    get_last_display_date,
-    set_daily_image,
-)
+from app.file_handling import get_image_paths
+from app.metadata import get_display_count, get_last_display_date, set_daily_images
 
 logger = logging.getLogger(__name__)
 
 
-def daily_image() -> Path:
+def daily_images() -> Path:
     today = date.today()
-
-    image_id = get_daily_image(today.isoformat())
-    if image_id:
-        path = get_image_path_by_id(image_id)
-        if not path.exists():
-            logger.error("Missing image file for id=%s", image_id)
-            return CONFIG.images.default_image
-        return path
 
     images = get_image_paths()
     if not images:
-        return CONFIG.images.default_image
-    chosen = choose_image(images, today)
-    set_daily_image(chosen.stem, today.isoformat())
+        return [CONFIG.images.default_image] * CONFIG.app.images_per_day
+
+    chosen = choose_images(images, CONFIG.app.images_per_day, today)
+    if len(chosen) < CONFIG.app.images_per_day:
+        return chosen + [CONFIG.images.default_image] * (
+            CONFIG.app.images_per_day - len(chosen)
+        )
+    set_daily_images([img.stem for img in chosen], today.isoformat())
 
     return chosen
 
@@ -55,14 +47,14 @@ def compute_weight(img: Path, today: date) -> float:
     return weight
 
 
-def choose_image(images, today: date) -> Path:
+def choose_images(images, n: int, today: date) -> list[Path]:
     rng = random.Random(today.isoformat())
     weights = []
 
     for img in images:
         weights.append(compute_weight(img, today))
 
-    return rng.choices(images, weights=weights, k=1)[0]
+    return rng.sample(images, k=min(n, len(images)))
 
 
 def random_image() -> Path:

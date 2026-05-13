@@ -70,56 +70,44 @@ def add_image_features(image_id: str, features: dict) -> None:
         )
 
 
-def set_daily_image(image_id: str, day: str) -> None:
+def set_daily_images(image_ids: list[str], day: str) -> None:
     with get_connection() as conn:
-        conn.execute(
-            """
-            INSERT OR REPLACE INTO daily_state (
-                date,
-                image_id
+        for image_id in image_ids:
+            conn.execute(
+                """
+                INSERT OR IGNORE INTO daily_state (date, image_id)
+                VALUES (?, ?)
+                """,
+                (day, image_id),
             )
-            VALUES (?, ?)
-        """,
-            (
-                day,
-                image_id,
-            ),
-        )
 
-        conn.execute(
-            """
-            INSERT OR IGNORE INTO displays (
-                image_id,
-                display_date
+            conn.execute(
+                """
+                INSERT OR IGNORE INTO displays (
+                    image_id,
+                    display_date
+                )
+                VALUES (?, ?)
+            """,
+                (
+                    image_id,
+                    day,
+                ),
             )
-            VALUES (?, ?)
-        """,
-            (
-                image_id,
-                day,
-            ),
-        )
 
 
-def get_daily_image(day: str) -> str | None:
+def get_daily_images(day: str) -> str | None:
     with get_connection() as conn:
-        row = conn.execute(
+        rows = conn.execute(
             """
             SELECT image_id
             FROM daily_state
             WHERE date = ?
-        """,
+            """,
             (day,),
-        ).fetchone()
+        ).fetchall()
 
-    if row is None:
-        return None
-
-    return row["image_id"]
-
-
-def get_todays_image() -> str | None:
-    return get_daily_image(date.today().isoformat())
+    return [r["image_id"] for r in rows]
 
 
 def get_display_count(image_id: str) -> int:
@@ -148,33 +136,3 @@ def get_last_display_date(image_id: str) -> str | None:
         ).fetchone()
 
     return row["last_date"]
-
-
-if __name__ == "__main__":
-    # init
-    init_db()
-
-    # init testing
-    images = ["abc.jpg", "test.jpg", "asdf.jpg", "x.jpg", "yoooo.jpg", "aa.jpg"]
-    images_processed = []
-    rnd = random.Random()
-
-    # process
-    today = date.today().isoformat()
-    for img in images:
-        rnd.seed(img)
-        new_file_name = uuid.UUID(int=rnd.getrandbits(128), version=4).hex
-        add_image(new_file_name, img, f"{new_file_name}.jpg", today)
-        images_processed.append(new_file_name)
-
-    # change daily image
-    for day in range(1, 31):
-        today = f"2026-05-{day:02}"
-        rnd.seed(today)
-        img = rnd.choice(images_processed)
-        if get_daily_image(today) is None:
-            set_daily_image(img, today)
-
-        print(f"{get_todays_image()}.jpg")
-        for img in images_processed:
-            print(get_display_count(img))
