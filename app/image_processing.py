@@ -3,7 +3,7 @@ from pathlib import Path
 
 from PIL import Image, ImageEnhance, ImageOps
 
-import config
+from app.confparser import CONFIG
 
 logger = logging.getLogger(__name__)
 
@@ -25,13 +25,13 @@ def validate_image(path: Path) -> tuple[bool, str | None]:
 def enhance_image(img: Image) -> Image:
 
     enhancer = ImageEnhance.Contrast(img)
-    result = enhancer.enhance(config.CONTRAST)
+    result = enhancer.enhance(CONFIG.images.contrast)
 
     enhancer = ImageEnhance.Color(result)
-    result = enhancer.enhance(config.SATURATION)
+    result = enhancer.enhance(CONFIG.images.saturation)
 
     enhancer = ImageEnhance.Sharpness(result)
-    result = enhancer.enhance(config.SHARPNESS)
+    result = enhancer.enhance(CONFIG.images.sharpness)
 
     return result
 

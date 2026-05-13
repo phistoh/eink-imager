@@ -9,8 +9,8 @@ from queue import Queue
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
-import config
-from image_processing import process_image, validate_image
+from app.confparser import CONFIG
+from app.image_processing import process_image, validate_image
 
 logger = logging.getLogger(__name__)
 image_queue: Queue[Path] = Queue()
@@ -49,16 +49,16 @@ def process_file(path: Path) -> None:
 
     if not valid_image:
         logger.info("Skipping %s (%s)", path, reason)
-        shutil.move(path, config.FAILED_DIR / new_file_name)
+        shutil.move(path, CONFIG.paths.failed_dir / new_file_name)
         return
 
     process_image(
         source=path,
-        destination=config.IMAGE_DIR / new_file_name,
+        destination=CONFIG.paths.image_dir / new_file_name,
         size=(800, 480),
     )
 
-    destination = config.PROCESSED_DIR / new_file_name
+    destination = CONFIG.paths.processed_dir / new_file_name
     shutil.move(path, destination)
     logger.info("Moved processed file to %s", destination)
 
@@ -91,7 +91,7 @@ def worker():
 
 
 def process_existing_files() -> None:
-    for path in sorted(config.WATCH_DIR.glob("*.jpg")):
+    for path in sorted(CONFIG.paths.watch_dir.glob("*.jpg")):
         logger.info("Queued file: %s", path)
         image_queue.put(path)
 
@@ -102,7 +102,7 @@ if __name__ == "__main__":
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     )
 
-    config.PROCESSED_DIR.mkdir(exist_ok=True)
+    CONFIG.paths.processed_dir.mkdir(exist_ok=True)
 
     threading.Thread(
         target=worker,
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     process_existing_files()
 
     observer = Observer()
-    observer.schedule(ImageHandler(), str(config.WATCH_DIR), recursive=False)
+    observer.schedule(ImageHandler(), str(CONFIG.paths.watch_dir), recursive=False)
     observer.start()
 
     logger.info("Watcher started")

@@ -5,7 +5,7 @@ import random
 from datetime import date
 from pathlib import Path
 
-from file_handling import get_image_paths
+from app.file_handling import get_image_paths
 
 logger = logging.getLogger(__name__)
 
