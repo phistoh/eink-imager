@@ -32,6 +32,13 @@ def daily() -> Response:
     return send_image(images[index])
 
 
+@app.route("/daily/<int:index>")
+def daily_with_index(index):
+    images = daily_images()
+    index = max(0, min(index, CONFIG.app.images_per_day - 1))
+    return send_image(images[index])
+
+
 @app.route("/random")
 def random() -> Response:
     image = random_image()
@@ -42,6 +49,11 @@ def random() -> Response:
 @app.route("/daily_view", strict_slashes=False)
 def daily_view():
     return render_template("daily.html", img_src="/daily")
+
+
+@app.route("/daily_view/<int:index>", strict_slashes=False)
+def daily_view_with_index(index):
+    return render_template("daily.html", img_src=f"/daily/{index}")
 
 
 @app.route("/random_view", strict_slashes=False)
