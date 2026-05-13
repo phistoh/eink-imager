@@ -17,14 +17,13 @@ def get_connection():
 
 
 def init_db() -> None:
-    schema = Path(f"schema_v{SCHEMA_VERSION}.sql")
+    schema = BASE_DIR / f"data/schema_v{SCHEMA_VERSION}.sql"
     if not schema.is_file():
         raise FileNotFoundError(f"SQL file missing or invalid: {schema}")
 
     with get_connection() as conn:
-        conn.executescript(
-            open(f"schema_v{SCHEMA_VERSION}.sql", encoding="UTF-8").read()
-        )
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.executescript(open(schema, encoding="UTF-8").read())
 
 
 def add_image(image_id, original_name, processed_name, created_at) -> None:
@@ -44,6 +43,29 @@ def add_image(image_id, original_name, processed_name, created_at) -> None:
                 original_name,
                 processed_name,
                 created_at,
+            ),
+        )
+
+
+def add_image_features(image_id: str, features: dict) -> None:
+    with get_connection() as conn:
+        conn.execute(
+            """
+            INSERT OR REPLACE INTO image_features (
+                image_id,
+                brightness,
+                hue,
+                saturation,
+                contrast
+            )
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (
+                image_id,
+                features["brightness"],
+                features["hue"],
+                features["saturation"],
+                features["contrast"],
             ),
         )
 
@@ -112,6 +134,20 @@ def get_display_count(image_id: str) -> int:
         ).fetchone()
 
     return row["count"] or 0
+
+
+def get_last_display_date(image_id: str) -> str | None:
+    with get_connection() as conn:
+        row = conn.execute(
+            """
+            SELECT MAX(display_date) AS last_date
+            FROM displays
+            WHERE image_id = ?
+            """,
+            (image_id,),
+        ).fetchone()
+
+    return row["last_date"]
 
 
 if __name__ == "__main__":

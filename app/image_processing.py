@@ -1,3 +1,4 @@
+import colorsys
 import logging
 from pathlib import Path
 
@@ -59,3 +60,43 @@ def process_image(
 
         result = result.convert("RGB")
         result.save(destination, format="JPEG", quality=95)
+
+
+def extract_features(path: Path) -> dict[str, float]:
+    with Image.open(path) as img:
+        img = img.convert("RGB")
+        img.thumbnail((64, 64))
+        pixels = list(img.getdata())
+
+    total_pixels = len(pixels)
+
+    reds = [p[0] for p in pixels]
+    greens = [p[1] for p in pixels]
+    blues = [p[2] for p in pixels]
+
+    avg_r = sum(reds) / total_pixels
+    avg_g = sum(greens) / total_pixels
+    avg_b = sum(blues) / total_pixels
+
+    brightness = (avg_r + avg_g + avg_b) / 3 / 255
+
+    hue, saturation, _ = colorsys.rgb_to_hsv(
+        avg_r / 255,
+        avg_g / 255,
+        avg_b / 255,
+    )
+
+    luminances = [(r + g + b) / 3 for r, g, b in pixels]
+
+    avg_luminance = sum(luminances) / total_pixels
+
+    variance = sum((lum - avg_luminance) ** 2 for lum in luminances) / total_pixels
+
+    contrast = variance**0.5 / 255
+
+    return {
+        "brightness": brightness,
+        "hue": hue,
+        "saturation": saturation,
+        "contrast": contrast,
+    }

@@ -225,4 +225,4 @@ static/images/*
 test/
 .pylintrc
 launch.json
-metadata.json
+metadata.*

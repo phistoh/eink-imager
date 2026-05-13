@@ -1,88 +1,68 @@
-import json
 import logging
 import math
 import random
 from datetime import date
 from pathlib import Path
 
-from app.file_handling import get_image_paths
+from app.confparser import CONFIG
+from app.file_handling import get_image_path_by_id, get_image_paths
+from app.metadata import (
+    get_daily_image,
+    get_display_count,
+    get_last_display_date,
+    set_daily_image,
+)
 
 logger = logging.getLogger(__name__)
 
-METADATA_FILE = Path("data/metadata.json")
 
-
-def choose_image(images):
-    weights = [1 / (img["display_count"] + 1) for img in images]
-
-    return random.choices(images, weights=weights, k=1)[0]
-
-
-# TODO: Store the daily image, so that the displaying of the daily image does not trigger to display another image
-def get_daily_image() -> Path:
-    images = get_image_paths()
+def daily_image() -> Path:
     today = date.today()
+
+    image_id = get_daily_image(today.isoformat())
+    if image_id:
+        path = get_image_path_by_id(image_id)
+        if not path.exists():
+            logger.error("Missing image file for id=%s", image_id)
+            return CONFIG.images.default_image
+        return path
+
+    images = get_image_paths()
+    chosen = choose_image(images, today)
+    set_daily_image(chosen.stem, today.isoformat())
+
+    return chosen
+
+
+def compute_weight(img: Path, today: date) -> float:
+    image_id = img.stem
+
+    display_count = get_display_count(image_id)
+    weight = 1 / math.sqrt(display_count + 1)
+
+    last_date_str = get_last_display_date(image_id)
+    if last_date_str:
+        last_date = date.fromisoformat(last_date_str)
+        days_since = (today - last_date).days
+
+        if days_since < 7:
+            weight *= 0.1
+        elif days_since < 30:
+            weight *= 0.5
+
+    return weight
+
+
+def choose_image(images, today: date) -> Path:
     rng = random.Random(today.isoformat())
-
-    metadata = load_metadata()
-    image_metadata = metadata.get("images", {})
-
     weights = []
 
     for img in images:
-        data = image_metadata.get(img.stem, {})
-        display_dates = data.get("display_dates", [])
-        display_count = len(display_dates)
-        weight = 1 / math.sqrt(display_count + 1)
-        if display_dates:
-            last_date = date.fromisoformat(max(display_dates))
-            days_since = (today - last_date).days
-            if days_since < 7:
-                weight *= 0.1
-            elif days_since < 30:
-                weight *= 0.5
-        weights.append(weight)
+        weights.append(compute_weight(img, today))
 
-    img = rng.choices(images, weights=weights, k=1)[0]
-    update_display_count(metadata, str(img.stem))
-
-    return img
+    return rng.choices(images, weights=weights, k=1)[0]
 
 
-def get_random_image() -> Path:
+def random_image() -> Path:
     images = get_image_paths()
     return random.choice(images)
-
-
-def load_metadata() -> dict:
-    if not METADATA_FILE.exists():
-        return {"images": {}}
-
-    with open(METADATA_FILE, "r", encoding="UTF-8") as f:
-        return json.load(f)
-
-
-def save_metadata(data: dict) -> None:
-    tmp = METADATA_FILE.with_suffix(".tmp")
-
-    with open(tmp, "w", encoding="UTF-8") as f:
-        json.dump(data, f, indent=2)
-
-    tmp.replace(METADATA_FILE)
-
-
-def is_new_image_for_today(metadata: dict) -> bool:
-    today = date.today().isoformat()
-    if today in metadata["display_dates"]:
-        return False
-
-    metadata["display_dates"].append(today)
-    return True
-
-
-def update_display_count(metadata: dict, id: str) -> bool:
-    if id not in metadata["images"]:
-        metadata["images"][id] = {"display_dates": []}
-
-    if is_new_image_for_today(metadata["images"][id]):
-        save_metadata(metadata)

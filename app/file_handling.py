@@ -48,6 +48,10 @@ def get_image_paths() -> list[Path]:
     return images or [CONFIG.images.default_image]
 
 
+def get_image_path_by_id(id) -> Path:
+    return CONFIG.paths.image_dir / id / ".jpg"
+
+
 def send_image(image: Path):
     etag = generate_etag(image)
     return send_from_directory(

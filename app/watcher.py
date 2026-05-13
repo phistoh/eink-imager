@@ -3,6 +3,7 @@ import shutil
 import threading
 import time
 import uuid
+from datetime import datetime
 from pathlib import Path
 from queue import Queue
 
@@ -10,7 +11,8 @@ from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 from app.confparser import CONFIG
-from app.image_processing import process_image, validate_image
+from app.image_processing import extract_features, process_image, validate_image
+from app.metadata import add_image, add_image_features, init_db
 
 logger = logging.getLogger(__name__)
 image_queue: Queue[Path] = Queue()
@@ -43,7 +45,8 @@ def process_file(path: Path) -> None:
 
     wait_until_complete(path)
 
-    new_file_name = f"{uuid.uuid4().hex}{path.suffix}"
+    new_file_id = f"{uuid.uuid4().hex}"
+    new_file_name = f"{new_file_id}{path.suffix}"
 
     valid_image, reason = validate_image(path)
 
@@ -60,6 +63,17 @@ def process_file(path: Path) -> None:
 
     destination = CONFIG.paths.processed_dir / new_file_name
     shutil.move(path, destination)
+
+    add_image(
+        image_id=new_file_id,
+        original_name=path.name,
+        processed_name=new_file_name,
+        created_at=datetime.now().isoformat(),
+    )
+
+    features = extract_features(destination)
+    add_image_features(new_file_id, features)
+
     logger.info("Moved processed file to %s", destination)
 
 
@@ -101,6 +115,8 @@ if __name__ == "__main__":
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     )
+
+    init_db()
 
     CONFIG.paths.processed_dir.mkdir(exist_ok=True)
 
