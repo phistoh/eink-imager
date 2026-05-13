@@ -1,13 +1,21 @@
 import logging
+from pathlib import Path
 
-from flask import Flask, Response, send_from_directory
+from flask import Flask, Response, render_template, send_from_directory
 
 from app.confparser import CONFIG
 from app.file_handling import check_cache, invalidate_cache, send_image
 from app.images import get_daily_image, get_random_image
 
 logger = logging.getLogger(__name__)
-app = Flask(__name__)
+
+BASE_DIR = Path(__file__).resolve().parents[1]
+app = Flask(
+    __name__,
+    template_folder=str(BASE_DIR / "app" / "templates"),
+    static_folder=str(BASE_DIR / "static"),
+    static_url_path="/static",
+)
 
 
 @app.route("/daily")
@@ -36,6 +44,11 @@ def random_image_without_cache() -> Response:
     invalidate_cache()
     image = get_random_image()
     return send_from_directory(CONFIG.paths.image_dir, image.name)
+
+
+@app.route("/")
+def daily_view():
+    return render_template("daily.html")
 
 
 if __name__ == "__main__":
