@@ -1,8 +1,31 @@
+import logging
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
 
+logger = logging.getLogger(__name__)
+
 BASE_DIR = Path(__file__).resolve().parents[1]
+
+DEFAULT_COFIG = """
+[paths]
+image-dir = "static/images"
+watch-dir = "data/incoming"
+processed-dir = "data/processed"
+failed-dir = "data/failed"
+
+[images]
+default-image = "static/assets/default.jpg"
+contrast = 1.3
+saturation = 1.15
+sharpness = 1.1
+
+[app]
+cache-ttl = 24
+images-per-day = 2
+debug = false
+
+"""
 
 
 @dataclass
@@ -36,6 +59,11 @@ class Config:
 
 
 def load_config(path: Path = Path("config.toml")) -> dict:
+    if not path.exists():
+        logger.info("No config file found. Creating a default config.")
+        with open(path, "w", encoding="UTF-8") as f:
+            f.write(DEFAULT_COFIG)
+
     with open(path, "rb") as f:
         return tomllib.load(f)
 
