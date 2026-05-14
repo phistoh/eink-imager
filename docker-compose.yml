@@ -1,0 +1,20 @@
+services:
+  web:
+    build: .
+    command: gunicorn -w 1 -b 0.0.0.0:8000 app.web:app
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./static:/app/static
+    environment:
+      - APP_BASE_DIR=/app/data
+
+  watcher:
+    build: .
+    command: python -m app.watcher
+    volumes:
+      - ./data:/app/data
+      - ./static:/app/static
+    environment:
+      - APP_BASE_DIR=/app/data

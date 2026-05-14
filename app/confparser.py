@@ -1,11 +1,14 @@
 import logging
+import os
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-BASE_DIR = Path(__file__).resolve().parents[1]
+BASE_DIR = Path(
+    os.environ.get("APP_BASE_DIR", str(Path(__file__).resolve().parents[1]))
+)
 
 DEFAULT_COFIG = """
 [paths]
