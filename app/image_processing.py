@@ -19,7 +19,7 @@ def validate_image(path: Path) -> tuple[bool, str | None]:
 
             return True, None
 
-    except Exception as e:
+    except Exception:
         return False, "Image invalid."
 
 
