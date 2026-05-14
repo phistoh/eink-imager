@@ -9,7 +9,7 @@ services:
       - ./static:/app/static
       - ./config.toml:/app/config.toml
     environment:
-      - APP_BASE_DIR=/app/data
+      - APP_BASE_DIR=/app
 
   watcher:
     build: .
@@ -19,4 +19,4 @@ services:
       - ./static:/app/static
       - ./config.toml:/app/config.toml
     environment:
-      - APP_BASE_DIR=/app/data
+      - APP_BASE_DIR=/app

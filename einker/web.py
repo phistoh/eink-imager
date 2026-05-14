@@ -1,4 +1,5 @@
 import logging
+import os
 from datetime import datetime
 from pathlib import Path
 
@@ -11,7 +12,9 @@ from einker.metadata import init_db
 
 logger = logging.getLogger(__name__)
 
-BASE_DIR = Path(__file__).resolve().parents[1]
+BASE_DIR = Path(
+    os.environ.get("APP_BASE_DIR", str(Path(__file__).resolve().parents[1]))
+)
 app = Flask(
     __name__,
     template_folder=str(BASE_DIR / "data" / "templates"),
