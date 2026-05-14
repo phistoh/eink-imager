@@ -8,9 +8,9 @@
 **eink-imager** is a simple Python application, which provides an HTTP endpoint serving image files (from an *output folder*). This endpoint will later be queried by a digital photo frame using an e-ink display. To add new images to serve, the application watches an *input folder* and processes all `*.jpg` files.
 
 ## Usage
-- Run `app.web` and `app.watcher` as modules from the root directory (`eink-imager/`).
-    - `app.web` serves the Flask endpoints
-    - `app.watcher` checks `watch-dir` and processes incoming files
+- Run `einker.web` and `einker.watcher` as modules from the root directory (`eink-imager/`).
+    - `einker.web` serves the Flask endpoints
+    - `einker.watcher` checks `watch-dir` and processes incoming files
 
 ## Attribution
 - Wall pattern by [Sisters.seamless](https://commons.wikimedia.org/wiki/File:Cream_textured_finish_seamless_building_wall_texture.jpg)

@@ -10,10 +10,10 @@ from queue import Queue
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
-from app.confparser import CONFIG
-from app.file_handling import scan_image_consistency
-from app.image_processing import extract_features, process_image, validate_image
-from app.metadata import add_image, add_image_features, init_db
+from einker.confparser import CONFIG
+from einker.file_handling import scan_image_consistency
+from einker.image_processing import extract_features, process_image, validate_image
+from einker.metadata import add_image, add_image_features, init_db
 
 logger = logging.getLogger(__name__)
 image_queue: Queue[Path] = Queue()

@@ -1,20 +1,22 @@
 services:
   web:
     build: .
-    command: gunicorn -w 1 -b 0.0.0.0:8000 app.web:app
+    command: gunicorn -w 1 -b 0.0.0.0:8000 einker.web:app
     ports:
       - "8000:8000"
     volumes:
       - ./data:/app/data
       - ./static:/app/static
+      - ./config.toml:/app/config.toml
     environment:
       - APP_BASE_DIR=/app/data
 
   watcher:
     build: .
-    command: python -m app.watcher
+    command: python -m einker.watcher
     volumes:
       - ./data:/app/data
       - ./static:/app/static
+      - ./config.toml:/app/config.toml
     environment:
       - APP_BASE_DIR=/app/data

@@ -4,9 +4,9 @@ import random
 from datetime import date
 from pathlib import Path
 
-from app.confparser import CONFIG
-from app.file_handling import get_image_paths
-from app.metadata import get_display_count, get_last_display_date, set_daily_images
+from einker.confparser import CONFIG
+from einker.file_handling import get_image_paths
+from einker.metadata import get_display_count, get_last_display_date, set_daily_images
 
 logger = logging.getLogger(__name__)
 

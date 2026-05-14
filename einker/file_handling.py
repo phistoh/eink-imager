@@ -5,8 +5,8 @@ from pathlib import Path
 
 from flask import send_from_directory
 
-from app.confparser import CONFIG
-from app.metadata import get_all_processed_names
+from einker.confparser import CONFIG
+from einker.metadata import get_all_processed_names
 
 logger = logging.getLogger(__name__)
 

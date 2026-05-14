@@ -11,4 +11,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # default command overridden in docker-compose
-CMD ["python", "-m", "app.web"]
+CMD ["python", "-m", "einker.web"]

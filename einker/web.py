@@ -4,10 +4,10 @@ from pathlib import Path
 
 from flask import Flask, Response, render_template
 
-from app.confparser import CONFIG
-from app.file_handling import check_cache, send_image
-from app.images import daily_images, random_image
-from app.metadata import init_db
+from einker.confparser import CONFIG
+from einker.file_handling import check_cache, send_image
+from einker.images import daily_images, random_image
+from einker.metadata import init_db
 
 logger = logging.getLogger(__name__)
 

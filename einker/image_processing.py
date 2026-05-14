@@ -4,7 +4,7 @@ from pathlib import Path
 
 from PIL import Image, ImageEnhance, ImageOps
 
-from app.confparser import CONFIG
+from einker.confparser import CONFIG
 
 logger = logging.getLogger(__name__)
 
