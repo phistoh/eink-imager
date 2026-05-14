@@ -1,7 +1,4 @@
-import random
 import sqlite3
-import uuid
-from datetime import date
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parents[1]
