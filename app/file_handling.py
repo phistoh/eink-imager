@@ -6,6 +6,7 @@ from pathlib import Path
 from flask import send_from_directory
 
 from app.confparser import CONFIG
+from app.metadata import get_all_processed_names
 
 logger = logging.getLogger(__name__)
 
@@ -55,3 +56,31 @@ def get_image_path_by_id(image_id) -> Path:
 def send_image(image: Path):
     etag = generate_etag(image)
     return send_from_directory(image.parent, image.name, conditional=True, etag=etag)
+
+
+def scan_image_consistency() -> bool:
+    db_is_consistent = True
+
+    db_files = get_all_processed_names()
+
+    disk_files = {
+        path.name for path in CONFIG.paths.image_dir.glob("*.jpg") if path.is_file()
+    }
+
+    missing_in_db = disk_files - db_files
+    missing_on_disk = db_files - disk_files
+
+    if len(missing_in_db) > 0:
+        db_is_consistent = False
+        missing_entries = "\n".join(f"- {item}" for item in sorted(missing_in_db))
+        logger.warning("Files missing in DB:\n%s", missing_entries)
+
+    if len(missing_on_disk) > 0:
+        db_is_consistent = False
+        missing_files = "\n".join(f"- {item}" for item in sorted(missing_on_disk))
+        logger.warning("DB entries missing on disk:\n%s", missing_files)
+
+    if db_is_consistent:
+        logger.info("Database consitency check successful.")
+
+    return db_is_consistent

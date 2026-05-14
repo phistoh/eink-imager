@@ -117,7 +117,7 @@ def get_display_count(image_id: str) -> int:
             SELECT COUNT(*) AS count
             FROM displays
             WHERE image_id = ?
-        """,
+            """,
             (image_id,),
         ).fetchone()
 
@@ -136,3 +136,26 @@ def get_last_display_date(image_id: str) -> str | None:
         ).fetchone()
 
     return row["last_date"]
+
+
+def get_all_processed_names() -> set[str]:
+    with get_connection() as conn:
+        rows = conn.execute(
+            """
+            SELECT processed_name
+            FROM images
+            """
+        ).fetchall()
+
+    return {row["processed_name"] for row in rows}
+
+
+def delete_image(image_id: str) -> None:
+    with get_connection() as conn:
+        conn.execute(
+            """
+            DELETE FROM images
+            WHERE id = ?
+            """,
+            (image_id,),
+        )

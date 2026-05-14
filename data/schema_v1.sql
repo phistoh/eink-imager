@@ -11,14 +11,14 @@ CREATE TABLE IF NOT EXISTS image_features(
   hue REAL,
   saturation REAL,
   contrast REAL,
-  FOREIGN KEY(image_id) REFERENCES images(id)
+  FOREIGN KEY(image_id) REFERENCES images(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS displays(
   image_id TEXT NOT NULL,
   display_date TEXT NOT NULL,
   PRIMARY KEY(image_id, display_date),
-  FOREIGN KEY(image_id) REFERENCES images(id)
+  FOREIGN KEY(image_id) REFERENCES images(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS daily_state(
