@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,9 +19,7 @@
             align-items: center;
             justify-content: center;
 
-            background:
-                url("{{ url_for('static', filename='assets/paper.jpg') }}")
-                repeat;
+            background: url("{{ url_for('static', filename='assets/paper.jpg') }}") repeat;
 
             font-family: sans-serif;
         }
@@ -32,15 +31,20 @@
                 0 22px 40px rgba(0, 0, 0, 0.65),
                 inset 0 0 0 2px rgba(255, 255, 255, 0.08);
 
-    background:
-        url("{{ url_for('static', filename='assets/frame.png') }}")
-        center / 100% 100% no-repeat;
+            background: url("{{ url_for('static', filename='assets/frame.png') }}") center / 100% 100% no-repeat;
+        }
+
+        .background-tint {
+            background-color: rgba(40, 61, 89, 0.5);
+            background-blend-mode: multiply;
         }
     </style>
 </head>
-<body>
+
+<body class="background-tint">
     <div class="framed">
         <img src="{{ img_src }}" />
     </div>
 </body>
+
 </html>
