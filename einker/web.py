@@ -64,6 +64,11 @@ def random_view():
     return render_template("daily.html", img_src="/random")
 
 
+@app.route("/health")
+def health():
+    return {"status": "ok"}, 200
+
+
 if __name__ == "__main__":
     logging.basicConfig(
         level=logging.INFO,
