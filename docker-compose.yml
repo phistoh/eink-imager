@@ -2,6 +2,7 @@ services:
   web:
     build: .
     command: gunicorn -w 1 -b 0.0.0.0:8000 einker.web:app
+    restart: unless-stopped
     ports:
       - "8000:8000"
     volumes:
@@ -10,13 +11,24 @@ services:
       - ./config.toml:/app/config.toml
     environment:
       - APP_BASE_DIR=/app
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   watcher:
     build: .
     command: python -m einker.watcher
+    restart: unless-stopped
     volumes:
       - ./data:/app/data
       - ./static:/app/static
       - ./config.toml:/app/config.toml
     environment:
       - APP_BASE_DIR=/app
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
