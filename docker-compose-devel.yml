@@ -1,6 +1,6 @@
 services:
   web:
-    image: ghcr.io/phistoh/einker:latest
+    build: .
     command: gunicorn -w 1 -b 0.0.0.0:8000 einker.web:app
     restart: unless-stopped
     ports:
@@ -8,8 +8,8 @@ services:
     volumes:
       - ./images:/app/static/images
       - ./incoming:/app/data/incoming
-      - ./failed:/app/data/failed
-      - ./processed:/app/data/processed
+      - ./incoming:/app/data/failed
+      - ./incoming:/app/data/processed
       - ./config.toml:/app/config.toml
     environment:
       - APP_BASE_DIR=/app
@@ -20,14 +20,14 @@ services:
         max-file: "3"
 
   watcher:
-    image: ghcr.io/phistoh/einker:latest
+    build: .
     command: python -m einker.watcher
     restart: unless-stopped
     volumes:
       - ./images:/app/static/images
       - ./incoming:/app/data/incoming
-      - ./failed:/app/data/failed
-      - ./processed:/app/data/processed
+      - ./incoming:/app/data/failed
+      - ./incoming:/app/data/processed
       - ./config.toml:/app/config.toml
     environment:
       - APP_BASE_DIR=/app
