@@ -1,18 +1,21 @@
 services:
   web:
     build: .
+    user: "${UID:-1000}:${GID:-100}"
     command: gunicorn -w 1 -b 0.0.0.0:8000 einker.web:app
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "8269:8000"
     volumes:
-      - ./images:/app/static/images
-      - ./incoming:/app/data/incoming
-      - ./incoming:/app/data/failed
-      - ./incoming:/app/data/processed
-      - ./config.toml:/app/config.toml
+      - ./data/images:/app/static/images:Z
+      - ./processing/incoming:/app/data/incoming:Z
+      - ./processing/failed:/app/data/failed:Z
+      - ./processing/processed:/app/data/processed:Z
+      - ./config:/app/config:Z
+      - ./data/metadata.db:/app/data/metadata.db:Z
     environment:
       - APP_BASE_DIR=/app
+      - HOME=/tmp
     logging:
       driver: json-file
       options:
@@ -21,18 +24,22 @@ services:
 
   watcher:
     build: .
+    user: "${UID:-1000}:${GID:-100}"
     command: python -m einker.watcher
     restart: unless-stopped
     volumes:
-      - ./images:/app/static/images
-      - ./incoming:/app/data/incoming
-      - ./incoming:/app/data/failed
-      - ./incoming:/app/data/processed
-      - ./config.toml:/app/config.toml
+      - ./data/images:/app/static/images:Z
+      - ./processing/incoming:/app/data/incoming:Z
+      - ./processing/failed:/app/data/failed:Z
+      - ./processing/processed:/app/data/processed:Z
+      - ./config:/app/config:Z
+      - ./data/metadata.db:/app/data/metadata.db:Z
     environment:
       - APP_BASE_DIR=/app
+      - HOME=/tmp
     logging:
       driver: json-file
       options:
         max-size: "10m"
         max-file: "3"
+

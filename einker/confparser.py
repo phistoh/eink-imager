@@ -95,4 +95,4 @@ def build_config(raw: dict) -> Config:
     return Config(paths=paths, images=images, app=app)
 
 
-CONFIG = build_config(load_config(BASE_DIR / "config.toml"))
+CONFIG = build_config(load_config(BASE_DIR / "config/config.toml"))
