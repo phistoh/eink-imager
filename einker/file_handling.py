@@ -1,9 +1,6 @@
-import hashlib
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-
-from flask import send_from_directory
 
 from einker.confparser import get_config
 from einker.metadata import get_all_processed_names
@@ -27,8 +24,10 @@ def check_cache() -> list[Path]:
     global _cached_image_list, _cache_time
 
     now = datetime.now()
-    if _cached_image_list is None or (now - _cache_time) > timedelta(
-        CONFIG.app.cache_ttl
+    if (
+        _cached_image_list is None
+        or _cache_time is None
+        or (now - _cache_time) > timedelta(CONFIG.app.cache_ttl)
     ):
         _cached_image_list = [
             path
@@ -40,24 +39,13 @@ def check_cache() -> list[Path]:
     return _cached_image_list
 
 
-def generate_etag(image: Path) -> str:
-    stat = image.stat()
-    raw = f"{image.name}-{stat.st_mtime}-{stat.st_size}"
-    return hashlib.md5(raw.encode()).hexdigest()
-
-
 def get_image_paths() -> list[Path]:
     images = check_cache()
     return images
 
 
 def get_image_path_by_id(image_id) -> Path:
-    return CONFIG.paths.image_dir / image_id / ".jpg"
-
-
-def send_image(image: Path):
-    etag = generate_etag(image)
-    return send_from_directory(image.parent, image.name, conditional=True, etag=etag)
+    return CONFIG.paths.image_dir / f"{image_id}.jpg"
 
 
 def scan_image_consistency() -> bool:

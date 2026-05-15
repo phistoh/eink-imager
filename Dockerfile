@@ -19,7 +19,7 @@ RUN mkdir -p \
 /app/incoming \
 /app/data/processed \
 /app/data/failed \
-/app/static/images
+/app/data/images
 # fix permissions
 RUN useradd -m -u ${UID} ${USER} \
 && chown -R ${UID}:${GID} /app

@@ -1,5 +1,5 @@
 [paths]
-image-dir = "static/images"
+image-dir = "data/images"
 watch-dir = "incoming"
 processed-dir = "data/processed"
 failed-dir = "data/failed"

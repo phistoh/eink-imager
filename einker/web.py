@@ -4,10 +4,10 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from flask import Flask, Response, render_template
+from flask import Flask, Response, render_template, send_file
 
 from einker.confparser import get_config
-from einker.file_handling import check_cache, send_image
+from einker.file_handling import check_cache
 from einker.images import daily_images, random_image
 from einker.metadata import init_db
 from einker.preflight import PreflightError, ready_check
@@ -36,20 +36,20 @@ def get_daily_index(n: int) -> int:
 def daily() -> Response:
     images = daily_images()
     index = get_daily_index(CONFIG.app.images_per_day)
-    return send_image(images[index])
+    return send_file(images[index], conditional=True)
 
 
 @app.route("/daily/<int:index>")
 def daily_with_index(index):
     images = daily_images()
     index = max(0, min(index, CONFIG.app.images_per_day - 1))
-    return send_image(images[index])
+    return send_file(images[index], conditional=True)
 
 
 @app.route("/random")
 def random() -> Response:
     image = random_image()
-    return send_image(image)
+    return send_file(image, conditional=True)
 
 
 @app.route("/")

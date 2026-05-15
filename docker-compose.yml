@@ -11,7 +11,6 @@ services:
       - "8269:8000"
     volumes:
       - ./data:/app/data:Z
-      - ./data/images:/app/static/images:Z
       - ./incoming:/app/incoming:Z
     environment:
       - APP_BASE_DIR=/app
@@ -32,7 +31,6 @@ services:
     restart: unless-stopped
     volumes:
       - ./data:/app/data:Z
-      - ./data/images:/app/static/images:Z
       - ./incoming:/app/incoming:Z
     environment:
       - APP_BASE_DIR=/app
