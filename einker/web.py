@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -9,6 +10,7 @@ from einker.confparser import get_config
 from einker.file_handling import check_cache, send_image
 from einker.images import daily_images, random_image
 from einker.metadata import init_db
+from einker.preflight import PreflightError, ready_check
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +78,18 @@ if __name__ == "__main__":
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     )
-    init_db()
-    check_cache()
+
+    try:
+        ready_check()
+        init_db()
+        check_cache()
+
+    except PreflightError as e:
+        logger.error(str(e))
+        sys.exit(1)
+
+    except FileNotFoundError as e:
+        logger.error(str(e))
+        sys.exit(1)
+
     app.run()

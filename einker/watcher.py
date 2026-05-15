@@ -1,5 +1,6 @@
 import logging
 import shutil
+import sys
 import threading
 import time
 import uuid
@@ -14,6 +15,7 @@ from einker.confparser import get_config
 from einker.file_handling import scan_image_consistency
 from einker.image_processing import extract_features, process_image, validate_image
 from einker.metadata import add_image, add_image_features, init_db
+from einker.preflight import PreflightError, ready_check
 
 logger = logging.getLogger(__name__)
 image_queue: Queue[Path] = Queue()
@@ -112,17 +114,15 @@ def process_existing_files() -> None:
         image_queue.put(path)
 
 
-if __name__ == "__main__":
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    )
-
+def startup():
+    ready_check()
     init_db()
     scan_image_consistency()
 
     CONFIG.paths.processed_dir.mkdir(exist_ok=True)
 
+
+def run_watcher():
     threading.Thread(
         target=worker,
         daemon=True,
@@ -145,3 +145,23 @@ if __name__ == "__main__":
         logger.info("Stopping watcher...")
         observer.stop()
         observer.join()
+
+
+def main():
+    try:
+        startup()
+
+    except (PreflightError, FileNotFoundError) as e:
+        logger.error(str(e))
+        sys.exit(1)
+
+    run_watcher()
+
+
+if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    )
+
+    main()
