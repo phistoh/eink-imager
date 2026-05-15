@@ -7,9 +7,12 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-EINKER_ROOT = Path(
-    os.environ.get("APP_BASE_DIR", str(Path(__file__).resolve().parents[1]))
-)
+
+def resolve_path(path: str) -> Path:
+    einker_root = Path(
+        os.environ.get("APP_BASE_DIR", str(Path(__file__).resolve().parents[1]))
+    )
+    return einker_root / path
 
 
 @dataclass
@@ -42,7 +45,7 @@ class Config:
     app: AppConfig
 
 
-def load_config(path: Path = Path("config.toml")) -> dict:
+def load_config(path: Path) -> dict:
     if not path.exists():
         raise FileNotFoundError(f"Missing config file: {path}")
 
@@ -52,14 +55,14 @@ def load_config(path: Path = Path("config.toml")) -> dict:
 
 def build_config(raw: dict) -> Config:
     paths = PathsConfig(
-        image_dir=EINKER_ROOT / raw["paths"]["image-dir"],
-        watch_dir=EINKER_ROOT / raw["paths"]["watch-dir"],
-        processed_dir=EINKER_ROOT / raw["paths"]["processed-dir"],
-        failed_dir=EINKER_ROOT / raw["paths"]["failed-dir"],
+        image_dir=resolve_path(raw["paths"]["image-dir"]),
+        watch_dir=resolve_path(raw["paths"]["watch-dir"]),
+        processed_dir=resolve_path(raw["paths"]["processed-dir"]),
+        failed_dir=resolve_path(raw["paths"]["failed-dir"]),
     )
 
     images = ImagesConfig(
-        default_image=EINKER_ROOT / raw["images"]["default-image"],
+        default_image=resolve_path(raw["images"]["default-image"]),
         contrast=float(os.getenv("EINKER_CONTRAST", raw["images"]["contrast"])),
         saturation=float(os.getenv("EINKER_SATURATION", raw["images"]["saturation"])),
         sharpness=float(os.getenv("EINKER_SHARPNESS", raw["images"]["sharpness"])),
@@ -78,4 +81,4 @@ def build_config(raw: dict) -> Config:
 
 @cache
 def get_config():
-    return build_config(load_config(EINKER_ROOT / "config/defaults.toml"))
+    return build_config(load_config(resolve_path("settings.toml")))

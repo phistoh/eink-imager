@@ -16,7 +16,7 @@ COPY . .
 
 # create folders
 RUN mkdir -p \
-/app/data/incoming \
+/app/incoming \
 /app/data/processed \
 /app/data/failed \
 /app/static/images

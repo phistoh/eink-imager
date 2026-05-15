@@ -9,7 +9,7 @@ services:
     volumes:
       - ./data:/app/data:Z
       - ./data/images:/app/static/images:Z
-      - ./config:/app/config:Z
+      - ./incoming:/app/incoming:Z
     environment:
       - APP_BASE_DIR=/app
       - HOME=/tmp
@@ -26,7 +26,7 @@ services:
     volumes:
       - ./data:/app/data:Z
       - ./data/images:/app/static/images:Z
-      - ./config:/app/config:Z
+      - ./incoming:/app/incoming:Z
     environment:
       - APP_BASE_DIR=/app
       - HOME=/tmp
