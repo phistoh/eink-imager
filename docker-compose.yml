@@ -7,12 +7,9 @@ services:
     ports:
       - "8269:8000"
     volumes:
+      - ./data:/app/data:Z
       - ./data/images:/app/static/images:Z
-      - ./processing/incoming:/app/data/incoming:Z
-      - ./processing/failed:/app/data/failed:Z
-      - ./processing/processed:/app/data/processed:Z
       - ./config:/app/config:Z
-      - ./data/metadata.db:/app/data/metadata.db:Z
     environment:
       - APP_BASE_DIR=/app
       - HOME=/tmp
@@ -28,12 +25,9 @@ services:
     command: python -m einker.watcher
     restart: unless-stopped
     volumes:
+      - ./data:/app/data:Z
       - ./data/images:/app/static/images:Z
-      - ./processing/incoming:/app/data/incoming:Z
-      - ./processing/failed:/app/data/failed:Z
-      - ./processing/processed:/app/data/processed:Z
       - ./config:/app/config:Z
-      - ./data/metadata.db:/app/data/metadata.db:Z
     environment:
       - APP_BASE_DIR=/app
       - HOME=/tmp

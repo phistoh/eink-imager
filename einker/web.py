@@ -5,19 +5,21 @@ from pathlib import Path
 
 from flask import Flask, Response, render_template
 
-from einker.confparser import CONFIG
+from einker.confparser import get_config
 from einker.file_handling import check_cache, send_image
 from einker.images import daily_images, random_image
 from einker.metadata import init_db
 
 logger = logging.getLogger(__name__)
 
+CONFIG = get_config()
+
 BASE_DIR = Path(
     os.environ.get("APP_BASE_DIR", str(Path(__file__).resolve().parents[1]))
 )
 app = Flask(
     __name__,
-    template_folder=str(BASE_DIR / "data" / "templates"),
+    template_folder=str(BASE_DIR / "static" / "templates"),
     static_folder=str(BASE_DIR / "static"),
     static_url_path="/static",
 )

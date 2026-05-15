@@ -4,11 +4,13 @@ import random
 from datetime import date
 from pathlib import Path
 
-from einker.confparser import CONFIG
+from einker.confparser import get_config
 from einker.file_handling import get_image_paths
 from einker.metadata import get_display_count, get_last_display_date, set_daily_images
 
 logger = logging.getLogger(__name__)
+
+CONFIG = get_config()
 
 
 def daily_images() -> Path:

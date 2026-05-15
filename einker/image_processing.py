@@ -4,9 +4,11 @@ from pathlib import Path
 
 from PIL import Image, ImageEnhance, ImageOps
 
-from einker.confparser import CONFIG
+from einker.confparser import get_config
 
 logger = logging.getLogger(__name__)
+
+CONFIG = get_config()
 
 
 def validate_image(path: Path) -> tuple[bool, str | None]:

@@ -5,13 +5,15 @@ from pathlib import Path
 
 from flask import send_from_directory
 
-from einker.confparser import CONFIG
+from einker.confparser import get_config
 from einker.metadata import get_all_processed_names
 
 logger = logging.getLogger(__name__)
 
 _cached_image_list = None
 _cache_time = None
+
+CONFIG = get_config()
 
 
 def invalidate_cache() -> None:

@@ -14,7 +14,7 @@ def get_connection():
 
 
 def init_db() -> None:
-    schema = BASE_DIR / f"data/schema_v{SCHEMA_VERSION}.sql"
+    schema = BASE_DIR / f"static/schemas/schema_v{SCHEMA_VERSION}.sql"
     if not schema.is_file():
         raise FileNotFoundError(f"SQL file missing or invalid: {schema}")
 
