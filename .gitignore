@@ -226,3 +226,4 @@ data/test/
 launch.json
 data/metadata.*
 config.toml
+.initialized

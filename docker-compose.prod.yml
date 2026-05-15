@@ -1,7 +1,7 @@
 services:
   web:
-    build: .
-    user: "${UID:-1000}:${GID:-100}"
+    image: ghcr.io/phistoh/einker:latest
+    pull_policy: always
     command: gunicorn -w 1 -b 0.0.0.0:8000 einker.web:app
     restart: unless-stopped
     ports:
@@ -20,8 +20,7 @@ services:
         max-file: "3"
 
   watcher:
-    build: .
-    user: "${UID:-1000}:${GID:-100}"
+    image: ghcr.io/phistoh/einker:latest
     command: python -m einker.watcher
     restart: unless-stopped
     volumes:
@@ -36,5 +35,3 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-
-
