@@ -1,0 +1,16 @@
+[paths]
+image-dir = "static/images"
+watch-dir = "data/incoming"
+processed-dir = "data/processed"
+failed-dir = "data/failed"
+
+[images]
+default-image = "static/assets/default.jpg"
+contrast = 1.3
+saturation = 1.15
+sharpness = 1.1
+
+[app]
+cache-ttl = 24
+images-per-day = 2
+debug = true

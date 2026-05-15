@@ -2,11 +2,12 @@ import logging
 import os
 import tomllib
 from dataclasses import dataclass
+from functools import cache
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-BASE_DIR = Path(
+EINKER_ROOT = Path(
     os.environ.get("APP_BASE_DIR", str(Path(__file__).resolve().parents[1]))
 )
 
@@ -51,27 +52,30 @@ def load_config(path: Path = Path("config.toml")) -> dict:
 
 def build_config(raw: dict) -> Config:
     paths = PathsConfig(
-        image_dir=BASE_DIR / raw["paths"]["image-dir"],
-        watch_dir=BASE_DIR / raw["paths"]["watch-dir"],
-        processed_dir=BASE_DIR / raw["paths"]["processed-dir"],
-        failed_dir=BASE_DIR / raw["paths"]["failed-dir"],
+        image_dir=EINKER_ROOT / raw["paths"]["image-dir"],
+        watch_dir=EINKER_ROOT / raw["paths"]["watch-dir"],
+        processed_dir=EINKER_ROOT / raw["paths"]["processed-dir"],
+        failed_dir=EINKER_ROOT / raw["paths"]["failed-dir"],
     )
 
     images = ImagesConfig(
-        default_image=BASE_DIR / raw["images"]["default-image"],
-        contrast=raw["images"]["contrast"],
-        saturation=raw["images"]["saturation"],
-        sharpness=raw["images"]["sharpness"],
+        default_image=EINKER_ROOT / raw["images"]["default-image"],
+        contrast=float(os.getenv("EINKER_CONTRAST", raw["images"]["contrast"])),
+        saturation=float(os.getenv("EINKER_SATURATION", raw["images"]["saturation"])),
+        sharpness=float(os.getenv("EINKER_SHARPNESS", raw["images"]["sharpness"])),
     )
 
     app = AppConfig(
         cache_ttl=raw["app"]["cache-ttl"],
-        images_per_day=raw["app"]["images-per-day"],
+        images_per_day=int(
+            os.getenv("EINKER_IMAGES_PER_DAY", raw["app"]["images-per-day"])
+        ),
         debug=raw["app"]["debug"],
     )
 
     return Config(paths=paths, images=images, app=app)
 
 
+@cache
 def get_config():
-    return build_config(load_config(BASE_DIR / "config/config.toml"))
+    return build_config(load_config(EINKER_ROOT / "config/defaults.toml"))
