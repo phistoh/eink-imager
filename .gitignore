@@ -225,6 +225,7 @@ data/test/
 data/processed/*
 data/incoming/*
 data/failed/*
+data/images/*
 .pylintrc
 launch.json
 data/metadata.*
