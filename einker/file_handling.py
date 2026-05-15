@@ -83,6 +83,6 @@ def scan_image_consistency() -> bool:
         logger.warning("DB entries missing on disk:\n%s", missing_files)
 
     if db_is_consistent:
-        logger.info("Database consitency check successful.")
+        logger.info("Database consistency check successful.")
 
     return db_is_consistent
