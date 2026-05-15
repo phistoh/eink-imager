@@ -3,11 +3,11 @@ COMPOSE_PROD=docker-compose.prod.yml
 
 dev:
 	make init
-	docker compose up -d --build -f $(COMPOSE_DEV)
+	docker compose -f $(COMPOSE_DEV) up -d --build --force-recreate
 
 up:
 	make init
-	docker compose up -d -f $(COMPOSE_PROD)
+	docker compose -f $(COMPOSE_PROD) up -d
 
 down:
 	$(COMPOSE_DEV) down || true
