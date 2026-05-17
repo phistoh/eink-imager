@@ -11,9 +11,7 @@
 - Run `einker.web` and `einker.watcher` as modules from the root directory (`eink-imager/`).
     - `einker.web` serves the Flask endpoints
     - `einker.watcher` checks `watch-dir` and processes incoming files
-
-## Building
-- `make dev` or `make up` create and start the respective Docker containers
+- The compose defines `data/` and `incoming/` as bind mounts. If not created manually (with the correct user), run `sudo chown -R {UID}:{GID} ./incoming ./data` (using the variables defined in the compose file)
 
 ## Attribution
 - Wall pattern by [Sisters.seamless](https://commons.wikimedia.org/wiki/File:Cream_textured_finish_seamless_building_wall_texture.jpg)

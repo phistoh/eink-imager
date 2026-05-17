@@ -5,7 +5,7 @@ from datetime import date
 from pathlib import Path
 
 from einker.confparser import get_config
-from einker.file_handling import get_image_paths
+from einker.file_handling import get_image_paths, invalidate_cache
 from einker.metadata import get_display_count, get_last_display_date, set_daily_images
 
 logger = logging.getLogger(__name__)
@@ -60,6 +60,7 @@ def choose_images(images, n: int, today: date) -> list[Path]:
 
 
 def random_image() -> Path:
+    invalidate_cache()
     images = get_image_paths()
     if not images:
         images = [CONFIG.images.default_image]
