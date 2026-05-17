@@ -19,5 +19,5 @@ def prepare_filesystem():
 
 
 if __name__ == "__main__":
-    init_db()
     prepare_filesystem()
+    init_db()
