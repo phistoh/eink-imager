@@ -16,15 +16,15 @@ COPY . .
 
 RUN useradd -m -u ${UID} -U ${USER}
 
+USER ${USER}
+
 # create folders
 RUN mkdir -p \
 /app/incoming \
 /app/data/processed \
 /app/data/failed \
 /app/data/images \
-&& chown -R ${USER}:${USER} /app
-
-USER ${USER}
+&& chown -R ${USER}:${GID} /app
 
 HEALTHCHECK --interval=30s \
 	--timeout=3s \
