@@ -12,6 +12,7 @@ services:
     environment:
       - APP_BASE_DIR=/app
       - HOME=/tmp
+      - TZ=Europe/Berlin
     logging:
       driver: json-file
       options:
@@ -25,6 +26,7 @@ services:
     volumes:
       - ./data:/app/data:Z
       - ./incoming:/app/incoming:Z
+      - TZ=Europe/Berlin
     environment:
       - APP_BASE_DIR=/app
       - HOME=/tmp
