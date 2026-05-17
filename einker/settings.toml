@@ -3,6 +3,7 @@ image-dir = "data/images"
 watch-dir = "incoming"
 processed-dir = "data/processed"
 failed-dir = "data/failed"
+data-dir = "data"
 
 [images]
 default-image = "static/assets/default.jpg"

@@ -6,29 +6,13 @@ ARG USER=einker
 
 WORKDIR /app
 
-# install dependencies
 COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
-
-# copy source code
-COPY . .
-
 RUN useradd -m -u ${UID} -U ${USER}
 
-USER ${USER}
-
-# create folders
-RUN mkdir -p \
-/app/incoming \
-/app/data/processed \
-/app/data/failed \
-/app/data/images
-
-USER root
-
-RUN chown -R ${USER}:${GID} /app \
-&& chmod 755 /app
+COPY --chown=${USER}:${USER} . .
+COPY --chmod=755 docker/entrypoint.sh /entrypoint.sh
 
 USER ${USER}
 
@@ -37,5 +21,7 @@ HEALTHCHECK --interval=30s \
 	--start-period=10s \
 	--retries=3 \
 	CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"
+
+ENTRYPOINT ["/entrypoint.sh"]
 
 CMD ["python", "-m", "einker.web"]

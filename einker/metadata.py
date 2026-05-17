@@ -20,7 +20,7 @@ def init_db() -> None:
 
     with get_connection() as conn:
         conn.execute("PRAGMA journal_mode=WAL")
-        conn.executescript(open(schema, encoding="UTF-8").read())
+        conn.executescript(schema.read_text(encoding="UTF-8"))
 
 
 def add_image(image_id, original_name, processed_name, created_at) -> None:

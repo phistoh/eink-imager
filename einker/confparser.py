@@ -21,6 +21,7 @@ class PathsConfig:
     watch_dir: Path
     processed_dir: Path
     failed_dir: Path
+    data_dir: Path
 
 
 @dataclass
@@ -59,6 +60,7 @@ def build_config(raw: dict) -> Config:
         watch_dir=resolve_path(raw["paths"]["watch-dir"]),
         processed_dir=resolve_path(raw["paths"]["processed-dir"]),
         failed_dir=resolve_path(raw["paths"]["failed-dir"]),
+        data_dir=resolve_path(raw["paths"]["data-dir"]),
     )
 
     images = ImagesConfig(
