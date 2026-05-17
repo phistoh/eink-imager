@@ -25,7 +25,8 @@ services:
 
   watcher:
     build:
-      context: .
+      context: ..
+      dockerfile: docker/Dockerfile
       args:
         UID: ${UID:-1000}
         GID: ${GID:-100}
