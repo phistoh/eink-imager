@@ -26,5 +26,10 @@ RUN useradd -m -u ${UID} ${USER} \
 
 USER ${USER}
 
-# default command overridden in docker-compose
+HEALTHCHECK --interval=30s \
+	--timeout=3s \
+	--start-period=10s \
+	--retries=3 \
+	CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"
+
 CMD ["python", "-m", "einker.web"]
