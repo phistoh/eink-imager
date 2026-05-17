@@ -23,8 +23,13 @@ RUN mkdir -p \
 /app/incoming \
 /app/data/processed \
 /app/data/failed \
-/app/data/images \
-&& chown -R ${USER}:${GID} /app
+/app/data/images
+
+USER root
+
+RUN chown -R ${USER}:${GID} /app
+
+USER ${USER}
 
 HEALTHCHECK --interval=30s \
 	--timeout=3s \
