@@ -14,15 +14,15 @@ RUN pip install --no-cache-dir -r requirements.txt
 # copy source code
 COPY . .
 
+RUN useradd -m -u ${UID} -U ${USER}
+
 # create folders
 RUN mkdir -p \
 /app/incoming \
 /app/data/processed \
 /app/data/failed \
-/app/data/images
-# fix permissions
-RUN useradd -m -u ${UID} ${USER} \
-&& chown -R ${UID}:${GID} /app
+/app/data/images \
+&& chown -R ${USER}:${USER} /app
 
 USER ${USER}
 
