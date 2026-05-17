@@ -62,5 +62,5 @@ def choose_images(images, n: int, today: date) -> list[Path]:
 def random_image() -> Path:
     images = get_image_paths()
     if not images:
-        images = CONFIG.images.default_image
+        images = [CONFIG.images.default_image]
     return random.choice(images)
