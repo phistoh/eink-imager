@@ -81,4 +81,4 @@ def build_config(raw: dict) -> Config:
 
 @cache
 def get_config():
-    return build_config(load_config(resolve_path("settings.toml")))
+    return build_config(load_config(resolve_path("einker/settings.toml")))

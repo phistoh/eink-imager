@@ -1,5 +1,5 @@
-COMPOSE_DEV=docker-compose.yml
-COMPOSE_PROD=docker-compose.prod.yml
+COMPOSE_DEV=docker/docker-compose.yml
+COMPOSE_PROD=docker/docker-compose.prod.yml
 
 dev:
 	make init
@@ -10,8 +10,8 @@ up:
 	docker compose -f $(COMPOSE_PROD) up -d
 
 down:
-	$(COMPOSE_DEV) down || true
-	$(COMPOSE_PROD) down || true
+	docker compose -f $(COMPOSE_DEV) down || true
+	docker compose -f $(COMPOSE_PROD) down || true
 
 init:
 	mkdir -p data/{incoming,processed,failed,images}

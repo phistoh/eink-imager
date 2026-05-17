@@ -12,6 +12,9 @@
     - `einker.web` serves the Flask endpoints
     - `einker.watcher` checks `watch-dir` and processes incoming files
 
+## Building
+- `make dev` or `make up` create and start the respective Docker containers
+
 ## Attribution
 - Wall pattern by [Sisters.seamless](https://commons.wikimedia.org/wiki/File:Cream_textured_finish_seamless_building_wall_texture.jpg)
 - Image frame by [ImageFramer](https://imageframer.net/web/)
