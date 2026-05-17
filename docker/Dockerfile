@@ -27,7 +27,8 @@ RUN mkdir -p \
 
 USER root
 
-RUN chown -R ${USER}:${GID} /app
+RUN chown -R ${USER}:${GID} /app \
+&& chmod 755 /app
 
 USER ${USER}
 
