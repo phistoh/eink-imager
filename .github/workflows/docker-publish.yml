@@ -5,6 +5,13 @@ on:
     tags:
       - "v*.*.*"
 
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Docker image tag"
+        required: true
+        default: "dev"
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -24,8 +31,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata
-        id: meta
+      #
+      # Stable release tags
+      #
+      - name: Extract metadata (release)
+        if: startsWith(github.ref, 'refs/tags/v')
+        id: meta_release
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository_owner }}/einker
@@ -33,10 +44,26 @@ jobs:
             type=ref,event=tag
             type=raw,value=latest
 
+      #
+      # Manual/dev tags
+      #
+      - name: Extract metadata (manual)
+        if: github.event_name == 'workflow_dispatch'
+        id: meta_manual
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/einker
+          tags: |
+            type=raw,value=${{ github.event.inputs.image_tag }}
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: |
+            ${{ steps.meta_release.outputs.tags }}
+            ${{ steps.meta_manual.outputs.tags }}
+          labels: |
+            ${{ steps.meta_release.outputs.labels }}
+            ${{ steps.meta_manual.outputs.labels }}
