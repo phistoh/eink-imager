@@ -41,22 +41,19 @@ def compute_weight(img: Path, today: date) -> float:
         last_date = date.fromisoformat(last_date_str)
         days_since = (today - last_date).days
 
-        if days_since < 7:
-            weight *= 0.1
-        elif days_since < 30:
-            weight *= 0.5
+        cooldown = 0.1 + 0.9 * (1 - math.exp(-days_since / 14))
+        weight *= cooldown
 
     return weight
 
 
 def choose_images(images, n: int, today: date) -> list[Path]:
     rng = random.Random(today.isoformat())
-    weights = []
+    raw_weights = [compute_weight(img, today) for img in images]
+    scale = 100 / max(raw_weights, default=1)
+    counts = [max(1, round(w * scale)) for w in raw_weights]
 
-    for img in images:
-        weights.append(compute_weight(img, today))
-
-    return rng.sample(images, k=min(n, len(images)))
+    return rng.sample(images, k=min(n, len(images)), counts=counts)
 
 
 def random_image() -> Path:
