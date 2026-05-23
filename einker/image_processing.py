@@ -2,7 +2,7 @@ import colorsys
 import logging
 from pathlib import Path
 
-from PIL import Image, ImageEnhance, ImageOps
+from PIL import Image, ImageEnhance, ImageFilter, ImageOps, ImageStat
 
 from einker.confparser import get_config
 
@@ -102,3 +102,27 @@ def extract_features(path: Path) -> dict[str, float]:
         "saturation": saturation,
         "contrast": contrast,
     }
+
+
+def edge_density(path: Path, threshold: int = 40) -> float:
+    img = Image.open(path).convert("L")
+
+    edges = img.filter(ImageFilter.FIND_EDGES)
+
+    pixels = edges.load()
+
+    width, height = edges.size
+    edge_pixels = 0
+
+    for y in range(height):
+        for x in range(width):
+            if pixels[x, y] > threshold:
+                edge_pixels += 1
+
+    return edge_pixels / (width * height)
+
+
+def entropy(path: Path) -> float:
+    with Image.open(path) as img:
+        return img.entropy()
+    return 0

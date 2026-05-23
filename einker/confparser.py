@@ -30,6 +30,7 @@ class ImagesConfig:
     contrast: float
     saturation: float
     sharpness: float
+    edge_threshold: float
 
 
 @dataclass
@@ -68,6 +69,9 @@ def build_config(raw: dict) -> Config:
         contrast=float(os.getenv("EINKER_CONTRAST", raw["images"]["contrast"])),
         saturation=float(os.getenv("EINKER_SATURATION", raw["images"]["saturation"])),
         sharpness=float(os.getenv("EINKER_SHARPNESS", raw["images"]["sharpness"])),
+        edge_threshold=float(
+            os.getenv("EINKER_EDGE_THRESHOLD", raw["images"]["edge_threshold"])
+        ),
     )
 
     app = AppConfig(

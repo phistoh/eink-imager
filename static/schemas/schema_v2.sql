@@ -36,3 +36,5 @@ CREATE INDEX IF NOT EXISTS idx_displays_image_date ON displays (
   image_id,
   display_date
 );
+
+PRAGMA user_version = 2;
