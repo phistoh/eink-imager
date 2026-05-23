@@ -230,3 +230,4 @@ data/images/*
 launch.json
 data/metadata.*
 .initialized
+docker/test/
