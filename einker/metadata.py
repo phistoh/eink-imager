@@ -3,7 +3,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 DB_PATH = BASE_DIR / "data/metadata.db"
-SCHEMA_VERSION = 1
+LATEST_SCHEMA_VERSION = 1
 
 
 def get_connection():
@@ -14,13 +14,37 @@ def get_connection():
 
 
 def init_db() -> None:
-    schema = BASE_DIR / f"static/schemas/schema_v{SCHEMA_VERSION}.sql"
+    schema = BASE_DIR / f"static/schemas/schema_v{LATEST_SCHEMA_VERSION}.sql"
     if not schema.is_file():
         raise FileNotFoundError(f"SQL file missing or invalid: {schema}")
 
     with get_connection() as conn:
         conn.execute("PRAGMA journal_mode=WAL")
         conn.executescript(schema.read_text(encoding="UTF-8"))
+
+
+def get_user_version(conn) -> int:
+    return conn.execute("PRAGMA user_version").fetchone()[0]
+
+
+def migrate_db():
+    with get_connection() as conn:
+        version = get_user_version(conn)
+
+        while version < LATEST_SCHEMA_VERSION:
+            next_version = version + 1
+
+            migration = (
+                BASE_DIR
+                / "static"
+                / "schemas"
+                / "migrations"
+                / f"v{version}_to_v{next_version}.sql"
+            )
+
+            conn.executescript(migration.read_text(encoding="UTF-8"))
+
+            version = next_version
 
 
 def add_image(image_id, original_name, processed_name, created_at) -> None:

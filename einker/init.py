@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from einker.confparser import get_config
-from einker.metadata import init_db
+from einker.metadata import init_db, migrate_db
 
 CONFIG = get_config()
 
@@ -18,6 +18,11 @@ def prepare_filesystem():
         Path(p).mkdir(parents=True, exist_ok=True)
 
 
-if __name__ == "__main__":
+def initialize():
     prepare_filesystem()
     init_db()
+    migrate_db()
+
+
+if __name__ == "__main__":
+    initialize()

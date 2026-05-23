@@ -80,8 +80,6 @@ if __name__ == "__main__":
     )
 
     try:
-        ready_check()
-        init_db()
         check_cache()
 
     except PreflightError as e:
