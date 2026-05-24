@@ -11,11 +11,11 @@ from queue import Queue
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
+from einker.bootstrap import PreflightError, bootstrap
 from einker.confparser import get_config
 from einker.file_handling import scan_image_consistency
 from einker.image_processing import extract_features, process_image, validate_image
-from einker.metadata import add_image, add_image_features, init_db
-from einker.preflight import PreflightError, ready_check
+from einker.metadata import add_image, add_image_features
 
 logger = logging.getLogger(__name__)
 image_queue: Queue[Path] = Queue()
@@ -114,14 +114,6 @@ def process_existing_files() -> None:
         image_queue.put(path)
 
 
-def startup():
-    ready_check()
-    init_db()
-    scan_image_consistency()
-
-    CONFIG.paths.processed_dir.mkdir(exist_ok=True)
-
-
 def run_watcher():
     threading.Thread(
         target=worker,
@@ -149,12 +141,18 @@ def run_watcher():
 
 def main():
     try:
-        startup()
+        bootstrap()
+        scan_image_consistency()
 
-    except (PreflightError, FileNotFoundError) as e:
+        CONFIG.paths.processed_dir.mkdir(exist_ok=True)
+
+    except PreflightError as e:
         logger.error(str(e))
         sys.exit(1)
 
+    except FileNotFoundError as e:
+        logger.error(str(e))
+        sys.exit(1)
     run_watcher()
 
 

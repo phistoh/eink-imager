@@ -6,11 +6,10 @@ from pathlib import Path
 
 from flask import Flask, Response, render_template, send_file
 
+from einker.bootstrap import PreflightError, bootstrap
 from einker.confparser import get_config
 from einker.file_handling import check_cache
 from einker.images import daily_images, random_image
-from einker.metadata import init_db
-from einker.preflight import PreflightError, ready_check
 
 logger = logging.getLogger(__name__)
 
@@ -80,6 +79,7 @@ if __name__ == "__main__":
     )
 
     try:
+        bootstrap()
         check_cache()
 
     except PreflightError as e:
