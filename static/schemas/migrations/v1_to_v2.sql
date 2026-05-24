@@ -6,4 +6,6 @@ ALTER TABLE image_features ADD COLUMN edge_density REAL;
 
 ALTER TABLE image_features ADD COLUMN entropy REAL;
 
+ALTER TABLE image_features ADD COLUMN feature_version INT;
+
 PRAGMA user_version = 2;

@@ -14,8 +14,12 @@ from watchdog.observers import Observer
 from einker.bootstrap import PreflightError, bootstrap
 from einker.confparser import get_config
 from einker.file_handling import scan_image_consistency
-from einker.image_processing import extract_features, process_image, validate_image
-from einker.metadata import add_image, add_image_features
+from einker.image_processing import (
+    extract_color_features,
+    process_image,
+    validate_image,
+)
+from einker.metadata import add_image, add_image_color_features
 
 logger = logging.getLogger(__name__)
 image_queue: Queue[Path] = Queue()
@@ -75,8 +79,8 @@ def process_file(path: Path) -> None:
         created_at=datetime.now().isoformat(),
     )
 
-    features = extract_features(destination)
-    add_image_features(new_file_id, features)
+    features = extract_color_features(destination)
+    add_image_color_features(new_file_id, features)
 
     logger.info("Moved processed file to %s", destination)
 

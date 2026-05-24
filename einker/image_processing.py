@@ -2,7 +2,7 @@ import colorsys
 import logging
 from pathlib import Path
 
-from PIL import Image, ImageEnhance, ImageFilter, ImageOps, ImageStat
+from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 
 from einker.confparser import get_config
 
@@ -64,7 +64,7 @@ def process_image(
         result.save(destination, format="JPEG", quality=95)
 
 
-def extract_features(path: Path) -> dict[str, float]:
+def extract_color_features(path: Path) -> dict[str, float]:
     with Image.open(path) as img:
         img = img.convert("RGB")
         img.thumbnail((64, 64))

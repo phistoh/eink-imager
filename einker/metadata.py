@@ -3,7 +3,13 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 DB_PATH = BASE_DIR / "data/metadata.db"
-LATEST_SCHEMA_VERSION = 1
+LATEST_SCHEMA_VERSION = 2
+
+FEATURE_VERSION = 1
+VALID_FEATURES = {
+    "edge_density",
+    "entropy",
+}
 
 
 def get_connection():
@@ -83,26 +89,63 @@ def add_image(image_id, original_name, processed_name, created_at) -> None:
         )
 
 
-def add_image_features(image_id: str, features: dict) -> None:
+def add_image_color_features(image_id: str, features: dict) -> None:
     with get_connection() as conn:
         conn.execute(
             """
-            INSERT OR REPLACE INTO image_features (
-                image_id,
-                brightness,
-                hue,
-                saturation,
-                contrast
+            INSERT OR IGNORE INTO image_features (
+                image_id
             )
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (?)
+            """,
+            (image_id,),
+        )
+
+        conn.execute(
+            """
+            UPDATE image_features
+            SET
+                brightness = ?,
+                hue = ?,
+                saturation = ?,
+                contrast = ?,
+                feature_version = ?
+            WHERE image_id = ?
             """,
             (
-                image_id,
                 features["brightness"],
                 features["hue"],
                 features["saturation"],
                 features["contrast"],
+                FEATURE_VERSION,
+                image_id,
             ),
+        )
+
+
+def add_image_feature(image_id: str, feature_name: str, feature_value: float) -> None:
+    if feature_name not in VALID_FEATURES:
+        raise ValueError(f"Unknown feature: {feature_name}")
+
+    with get_connection() as conn:
+        conn.execute(
+            """
+            INSERT OR IGNORE INTO image_features (
+                image_id
+            )
+            VALUES (?)
+            """,
+            (image_id,),
+        )
+
+        conn.execute(
+            f"""
+            UPDATE image_features
+            SET {feature_name} = ?,
+            feature_version = ?
+            WHERE image_id = ?
+            """,
+            (feature_value, FEATURE_VERSION, image_id),
         )
 
 
@@ -195,3 +238,33 @@ def delete_image(image_id: str) -> None:
             """,
             (image_id,),
         )
+
+
+def get_images_with_missing_feature(
+    feature: str,
+):
+
+    table = "image_features"
+    query = f"""
+        SELECT images.id
+        FROM images
+        LEFT JOIN {table}
+            ON images.id = {table}.image_id
+        WHERE {table}.{feature} IS NULL
+            OR {table}.feature_version < {FEATURE_VERSION}
+    """
+
+    with get_connection() as conn:
+        return conn.execute(query).fetchall()
+
+
+def get_images_with_missing_hash():
+
+    query = """
+        SELECT images.id
+        FROM images
+        WHERE "image_hash IS NULL"
+    """
+
+    with get_connection() as conn:
+        return conn.execute(query).fetchall()

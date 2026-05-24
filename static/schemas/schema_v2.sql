@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS image_features(
   contrast REAL,
   edge_density REAL,
   entropy REAL,
+  feature_version INTEGER DEFAULT 0,
   FOREIGN KEY(image_id) REFERENCES images(id) ON DELETE CASCADE
 );
 
