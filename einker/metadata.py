@@ -31,6 +31,21 @@ def migrate_db():
     with get_connection() as conn:
         version = get_user_version(conn)
 
+        # legacy DB without user_version
+        if version == 0:
+            tables_exist = conn.execute(
+                """
+                SELECT name
+                FROM sqlite_master
+                WHERE type='table'
+                AND name='images'
+            """
+            ).fetchone()
+
+            if tables_exist:
+                conn.execute("PRAGMA user_version = 1")
+                version = 1
+
         while version < LATEST_SCHEMA_VERSION:
             next_version = version + 1
 
