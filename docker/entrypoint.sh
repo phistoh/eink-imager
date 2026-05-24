@@ -2,7 +2,7 @@
 set -e
 
 echo "Initializing file structure..."
-python -m einker.init
+python -m einker.setup
 
 echo "Checking permissions..."
 python -m einker.preflight
