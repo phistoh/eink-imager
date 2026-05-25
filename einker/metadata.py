@@ -7,6 +7,10 @@ LATEST_SCHEMA_VERSION = 2
 
 FEATURE_VERSION = 1
 VALID_FEATURES = {
+    "brightness",
+    "hue",
+    "saturation",
+    "contrast",
     "edge_density",
     "entropy",
 }
@@ -263,8 +267,22 @@ def get_images_with_missing_hash():
     query = """
         SELECT images.id
         FROM images
-        WHERE "image_hash IS NULL"
+        WHERE image_hash IS NULL
     """
 
     with get_connection() as conn:
         return conn.execute(query).fetchall()
+
+
+def get_image_features(image_id: str) -> dict:
+    with get_connection() as conn:
+        row = conn.execute(
+            """
+            SELECT *
+            FROM image_features
+            WHERE image_id = ?
+            """,
+            (image_id,),
+        ).fetchone()
+
+    return dict(row) if row else {}
