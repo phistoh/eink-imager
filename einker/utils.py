@@ -15,5 +15,16 @@ def lerp(
     return low + value * (high - low)
 
 
-def gaussian_score(value, ideal, sigma):
-    return math.exp(-((value - ideal) ** 2) / (2 * sigma**2))
+def hue_distance(a: float, b: float) -> float:
+    d = abs(a - b)
+    return min(d, 1.0 - d)
+
+
+def hue_preference(
+    hue: float,
+    target: float,
+    sigma: float = 0.1,
+) -> float:
+    distance = hue_distance(hue, target)
+
+    return math.exp(-(distance**2) / (2 * sigma**2))
