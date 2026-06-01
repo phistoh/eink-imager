@@ -16,12 +16,6 @@ COPY --chmod=755 docker/entrypoint.sh /entrypoint.sh
 
 USER ${USER}
 
-HEALTHCHECK --interval=30s \
-	--timeout=3s \
-	--start-period=10s \
-	--retries=3 \
-	CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"
-
 ENTRYPOINT ["/entrypoint.sh"]
 
 CMD ["python", "-m", "einker.web"]

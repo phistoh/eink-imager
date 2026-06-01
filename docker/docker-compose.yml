@@ -23,6 +23,18 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"
+        ]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
 
   watcher:
     build:
@@ -46,5 +58,17 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "from einker.bootstrap import ready_check; ready_check()"
+        ]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
 
 
