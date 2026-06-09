@@ -19,7 +19,7 @@ from einker.image_processing import (
     process_image,
     validate_image,
 )
-from einker.metadata import add_image, add_image_color_features
+from einker.metadata import add_image, add_image_color_features, set_eink_evaluation
 from einker.utils import lerp
 
 logger = logging.getLogger(__name__)
@@ -89,7 +89,25 @@ def process_file(path: Path) -> None:
     score *= lerp(features.get("contrast", 0.5), 0.7, 1.3)
 
     if score < 0.75:
-        logger.info("Image '%s' probably not suitable for e-ink displays.", destination)
+        logger.info(
+            "Image '%s' probably not suitable for e-ink displays. (Score: %.2f)",
+            destination,
+            score,
+        )
+
+        set_eink_evaluation(
+            new_file_id,
+            "rejected",
+            score,
+            "automatic heuristic rejection",
+        )
+
+    else:
+        set_eink_evaluation(
+            new_file_id,
+            "accepted",
+            score,
+        )
 
     logger.info("Moved processed file to %s", destination)
 

@@ -1,9 +1,12 @@
+import logging
 import sqlite3
 from pathlib import Path
 
+logger = logging.getLogger(__name__)
+
 BASE_DIR = Path(__file__).resolve().parents[1]
 DB_PATH = BASE_DIR / "data/metadata.db"
-LATEST_SCHEMA_VERSION = 2
+LATEST_SCHEMA_VERSION = 3
 
 FEATURE_VERSION = 1
 VALID_FEATURES = {
@@ -40,6 +43,12 @@ def get_user_version(conn) -> int:
 def migrate_db():
     with get_connection() as conn:
         version = get_user_version(conn)
+        migrated = False
+
+        logger.info(
+            "Current database schema version: %s",
+            version,
+        )
 
         # legacy DB without user_version
         if version == 0:
@@ -57,7 +66,14 @@ def migrate_db():
                 version = 1
 
         while version < LATEST_SCHEMA_VERSION:
+            migrated = True
             next_version = version + 1
+
+            logger.info(
+                "Migrating database: v%s -> v%s",
+                version,
+                next_version,
+            )
 
             migration = (
                 BASE_DIR
@@ -69,7 +85,17 @@ def migrate_db():
 
             conn.executescript(migration.read_text(encoding="UTF-8"))
 
+            conn.execute(f"PRAGMA user_version = {next_version}")
+
+            conn.commit()
+
             version = next_version
+
+        if migrated:
+            logger.info(
+                "Database successfully migrated to v%s",
+                version,
+            )
 
 
 def add_image(image_id, original_name, processed_name, created_at) -> None:
@@ -150,6 +176,31 @@ def add_image_feature(image_id: str, feature_name: str, feature_value: float) ->
             WHERE image_id = ?
             """,
             (feature_value, FEATURE_VERSION, image_id),
+        )
+
+
+def set_eink_evaluation(
+    image_id: str,
+    status: str,
+    score: float,
+    reason: str | None = None,
+) -> None:
+    with get_connection() as conn:
+        conn.execute(
+            """
+            UPDATE images
+            SET
+                eink_status = ?,
+                eink_score = ?,
+                eink_reason = ?
+            WHERE id = ?
+            """,
+            (
+                status,
+                score,
+                reason,
+                image_id,
+            ),
         )
 
 
