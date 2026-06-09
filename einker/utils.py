@@ -15,9 +15,20 @@ def lerp(
     return low + value * (high - low)
 
 
-def hue_distance(a: float, b: float) -> float:
+def circular_distance(a: float, b: float, circumference: float = 1.0) -> float:
     d = abs(a - b)
-    return min(d, 1.0 - d)
+    return min(d, circumference - d)
+
+
+def gaussian_similarity(
+    x: float,
+    sigma: float,
+) -> float:
+    """Calculates a weight depending on a bell curve.
+    Since it is not a probability distribution, both the expected value `my`
+    and the normalization `1/(sigma*sqrt(2pi))` are not present."""
+
+    return math.exp(-(x**2) / (2 * sigma**2))
 
 
 def hue_preference(
@@ -25,6 +36,6 @@ def hue_preference(
     target: float,
     sigma: float = 0.1,
 ) -> float:
-    distance = hue_distance(hue, target)
+    distance = circular_distance(hue, target)
 
-    return math.exp(-(distance**2) / (2 * sigma**2))
+    return gaussian_similarity(distance, sigma)
