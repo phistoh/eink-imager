@@ -9,6 +9,7 @@ from einker.image_processing import evaluate_eink_suitability, extract_all_featu
 from einker.metadata import (
     add_image_color_features,
     add_image_feature,
+    find_duplicate_images,
     get_image_features,
     get_images_with_missing_feature,
     get_images_with_missing_hash,
@@ -47,6 +48,16 @@ def backfill_feature(feature_name: str) -> None:
             images = get_images_with_missing_hash()
             for (image_id,) in images:
                 features = extract_all_features(get_image_path_by_id(image_id))
+                duplicates = find_duplicate_images(features["image_hash"])
+
+                if duplicates and duplicates["id"] != image_id:
+                    logger.warning(
+                        "Backfill skip: %s duplicates existing image %s",
+                        image_id,
+                        duplicates["id"],
+                    )
+                    continue
+
                 set_image_hash(image_id, features["image_hash"])
                 logger.info(
                     "Backfilled image hash for image %s: %s",

@@ -368,3 +368,18 @@ def get_image_features(image_id: str) -> dict:
         ).fetchone()
 
     return dict(row) if row else {}
+
+
+def find_duplicate_images(image_hash: str) -> dict | None:
+    with get_connection() as conn:
+        row = conn.execute(
+            """
+            SELECT id, created_at, original_name
+            FROM images
+            WHERE image_hash = ?
+            LIMIT 1;
+            """,
+            (image_hash,),
+        ).fetchone()
+
+    return dict(row) if row else None

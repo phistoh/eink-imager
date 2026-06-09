@@ -24,6 +24,7 @@ from einker.metadata import (
     add_image,
     add_image_color_features,
     add_image_feature,
+    find_duplicate_images,
     set_eink_evaluation,
     set_image_hash,
 )
@@ -54,6 +55,11 @@ def wait_until_complete(path: Path, timeout: int = 60) -> None:
             raise TimeoutError(f"Timed out waiting for {path}")
 
 
+def reject(path: Path, new_file_name: str, reason: str) -> None:
+    logger.info("Rejecting %s: %s", path, reason)
+    shutil.move(path, CONFIG.paths.failed_dir / new_file_name)
+
+
 def process_file(path: Path) -> None:
     if not path.exists():
         return
@@ -66,18 +72,19 @@ def process_file(path: Path) -> None:
     valid_image, reason = validate_image(path)
 
     if not valid_image:
-        logger.info("Skipping %s (%s)", path, reason)
-        shutil.move(path, CONFIG.paths.failed_dir / new_file_name)
+        reject(path, new_file_name, reason)
         return
 
-    process_image(
-        source=path,
-        destination=CONFIG.paths.image_dir / new_file_name,
-        size=(800, 480),
-    )
+    features = extract_all_features(path)
 
-    destination = CONFIG.paths.processed_dir / new_file_name
-    shutil.move(path, destination)
+    duplicates = find_duplicate_images(features["image_hash"])
+    if duplicates:
+        reject(
+            path,
+            new_file_name,
+            f"duplicate of {duplicates['original_name']} (created at {duplicates['created_at']})",
+        )
+        return
 
     add_image(
         image_id=new_file_id,
@@ -86,7 +93,6 @@ def process_file(path: Path) -> None:
         created_at=datetime.now().isoformat(),
     )
 
-    features = extract_all_features(destination)
     add_image_color_features(new_file_id, features)
 
     add_image_feature(
@@ -108,7 +114,7 @@ def process_file(path: Path) -> None:
     if evaluation["status"] == "rejected":
         logger.info(
             "Image '%s' probably not suitable for e-ink displays. (Score: %.2f)",
-            destination,
+            path,
             evaluation["score"],
         )
 
@@ -118,6 +124,15 @@ def process_file(path: Path) -> None:
         evaluation["score"],
         evaluation["reason"],
     )
+
+    process_image(
+        source=path,
+        destination=CONFIG.paths.image_dir / new_file_name,
+        size=(800, 480),
+    )
+
+    destination = CONFIG.paths.processed_dir / new_file_name
+    shutil.move(path, destination)
 
     logger.info("Moved processed file to %s", destination)
 
