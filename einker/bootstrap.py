@@ -5,14 +5,17 @@ from pathlib import Path
 
 from einker.confparser import get_config
 from einker.file_handling import get_image_path_by_id
-from einker.image_processing import edge_density, entropy, extract_color_features
+from einker.image_processing import evaluate_eink_suitability, extract_all_features
 from einker.metadata import (
     add_image_color_features,
     add_image_feature,
+    get_image_features,
     get_images_with_missing_feature,
     get_images_with_missing_hash,
+    get_images_without_eink_evaluation,
     init_db,
     migrate_db,
+    set_eink_evaluation,
 )
 
 logger = logging.getLogger(__name__)
@@ -41,36 +44,74 @@ def backfill_feature(feature_name: str) -> None:
     match feature_name:
         case "hash":
             images = get_images_with_missing_hash()
-            for image in images:
-                image_id = image[0]
+            for (image_id,) in images:
+                pass
                 # todo
         case "color_features":
-            images = []
-            images += get_images_with_missing_feature("brightness")
-            images += get_images_with_missing_feature("hue")
-            images += get_images_with_missing_feature("saturation")
-            images += get_images_with_missing_feature("contrast")
-            for image in images:
-                image_id = image[0]
-                features = extract_color_features(get_image_path_by_id(image_id))
+            images = set()
+            images.update(get_images_with_missing_feature("brightness"))
+            images.update(get_images_with_missing_feature("hue"))
+            images.update(get_images_with_missing_feature("saturation"))
+            images.update(get_images_with_missing_feature("contrast"))
+
+            for (image_id,) in images:
+                features = extract_all_features(get_image_path_by_id(image_id))
                 add_image_color_features(image_id, features)
                 logger.info(
                     "Backfilled color features for image %s: %s", image_id, features
                 )
-        case "entropy":
-            images = get_images_with_missing_feature("entropy")
-            for image in images:
-                image_id = image[0]
-                value = entropy(get_image_path_by_id(image_id))
-                add_image_feature(image_id, "entropy", value)
-                logger.info("Backfilled entropy for image %s: %s", image_id, value)
-        case "edge_density":
-            images = get_images_with_missing_feature("edge_density")
-            for image in images:
-                image_id = image[0]
-                value = edge_density(get_image_path_by_id(image_id))
-                add_image_feature(image_id, "edge_density", value)
-                logger.info("Backfilled edge_density for image %s: %s", image_id, value)
+        case "entropy" | "edge_density":
+            images = get_images_with_missing_feature(feature_name)
+            for (image_id,) in images:
+                features = extract_all_features(get_image_path_by_id(image_id))
+                add_image_feature(image_id, feature_name, features[feature_name])
+                logger.info(
+                    "Backfilled %s for image %s: %s",
+                    feature_name,
+                    image_id,
+                    features[feature_name],
+                )
+
+
+def backfill_eink_evaluations() -> None:
+    rows = get_images_without_eink_evaluation()
+
+    logger.info(
+        "Backfilling %s missing e-ink evaluations",
+        len(rows),
+    )
+    for row in rows:
+        image_id = row["id"]
+        features = get_image_features(image_id)
+
+        required = {
+            "entropy",
+            "edge_density",
+            "contrast",
+        }
+
+        if not required.issubset(features):
+            logger.warning(
+                "Skipping e-ink evaluation for '%s': missing features",
+                image_id,
+            )
+            continue
+
+        evaluation = evaluate_eink_suitability(features)
+
+        set_eink_evaluation(
+            image_id,
+            evaluation["status"],
+            evaluation["score"],
+            evaluation["reason"],
+        )
+
+        logger.info(
+            "Backfilled e-ink evaluation for '%s': %s (%.2f)",
+            image_id,
+            evaluation["status"],
+            evaluation["score"],
+        )
 
 
 def initialize():

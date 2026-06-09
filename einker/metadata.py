@@ -325,6 +325,19 @@ def get_images_with_missing_hash():
         return conn.execute(query).fetchall()
 
 
+def get_images_without_eink_evaluation():
+
+    query = """
+        SELECT images.id
+        FROM images
+        WHERE eink_status IS NULL
+            OR eink_score IS NULL
+    """
+
+    with get_connection() as conn:
+        return conn.execute(query).fetchall()
+
+
 def get_image_features(image_id: str) -> dict:
     with get_connection() as conn:
         row = conn.execute(

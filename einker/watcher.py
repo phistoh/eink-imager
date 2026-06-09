@@ -15,12 +15,17 @@ from einker.bootstrap import PreflightError, bootstrap
 from einker.confparser import get_config
 from einker.file_handling import scan_image_consistency
 from einker.image_processing import (
-    extract_color_features,
+    evaluate_eink_suitability,
+    extract_all_features,
     process_image,
     validate_image,
 )
-from einker.metadata import add_image, add_image_color_features, set_eink_evaluation
-from einker.utils import lerp
+from einker.metadata import (
+    add_image,
+    add_image_color_features,
+    add_image_feature,
+    set_eink_evaluation,
+)
 
 logger = logging.getLogger(__name__)
 image_queue: Queue[Path] = Queue()
@@ -80,34 +85,36 @@ def process_file(path: Path) -> None:
         created_at=datetime.now().isoformat(),
     )
 
-    features = extract_color_features(destination)
+    features = extract_all_features(destination)
     add_image_color_features(new_file_id, features)
 
-    score = 1.0
-    score *= lerp(features.get("entropy", 0.5), 0.7, 1.2, True)
-    score *= lerp(features.get("edge_density", 0.5), 0.6, 1.2, True)
-    score *= lerp(features.get("contrast", 0.5), 0.7, 1.3)
+    add_image_feature(
+        new_file_id,
+        "entropy",
+        features["entropy"],
+    )
 
-    if score < 0.75:
+    add_image_feature(
+        new_file_id,
+        "edge_density",
+        features["edge_density"],
+    )
+
+    evaluation = evaluate_eink_suitability(features)
+
+    if evaluation["status"] == "rejected":
         logger.info(
             "Image '%s' probably not suitable for e-ink displays. (Score: %.2f)",
             destination,
-            score,
+            evaluation["score"],
         )
 
-        set_eink_evaluation(
-            new_file_id,
-            "rejected",
-            score,
-            "automatic heuristic rejection",
-        )
-
-    else:
-        set_eink_evaluation(
-            new_file_id,
-            "accepted",
-            score,
-        )
+    set_eink_evaluation(
+        new_file_id,
+        evaluation["status"],
+        evaluation["score"],
+        evaluation["reason"],
+    )
 
     logger.info("Moved processed file to %s", destination)
 

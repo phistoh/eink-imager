@@ -5,6 +5,7 @@ from pathlib import Path
 from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 
 from einker.confparser import get_config
+from einker.utils import lerp
 
 logger = logging.getLogger(__name__)
 
@@ -126,3 +127,29 @@ def entropy(path: Path) -> float:
     with Image.open(path) as img:
         return img.entropy()
     return 0
+
+
+def evaluate_eink_suitability(features: dict[str, float]):
+
+    score = 1.0
+    score *= lerp(features.get("entropy", 0.5), 0.7, 1.2, True)
+    score *= lerp(features.get("edge_density", 0.5), 0.6, 1.2, True)
+    score *= lerp(features.get("contrast", 0.5), 0.7, 1.3)
+
+    status = "accepted" if score >= 0.75 else "rejected"
+
+    return {
+        "status": status,
+        "score": score,
+        "reason": (None if status == "accepted" else "automatic heuristic rejection"),
+    }
+
+
+def extract_all_features(path: Path) -> dict[str, float]:
+    features = {
+        **extract_color_features(path),
+        "entropy": entropy(path),
+        "edge_density": edge_density(path),
+    }
+
+    return features
