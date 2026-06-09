@@ -54,7 +54,7 @@ def weather_modifier(image_id: str, today: date) -> float:
     return modifier
 
 
-def season_modifer(image_id: str, today: date) -> float:
+def season_modifier(image_id: str, today: date) -> float:
     features = get_image_features(image_id)
 
     brightness = features.get("brightness", 0.5)
@@ -272,9 +272,8 @@ def compute_weight(img: Path, today: date) -> float:
 
     weight *= cooldown_modifier(image_id, today)
     weight *= weather_modifier(image_id, today)
-    weight *= season_modifer(image_id, today)
+    weight *= season_modifier(image_id, today)
     weight *= daytime_modifier(image_id)
-    weight *= eink_modifier(image_id, today)
 
     return weight
 
