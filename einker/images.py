@@ -259,11 +259,6 @@ def daytime_modifier(image_id: str) -> float:
     return modifier
 
 
-def eink_modifier(image_id: str, today: date) -> float:
-    modifier = 1
-    return modifier
-
-
 def compute_weight(img: Path, today: date) -> float:
     image_id = img.stem
 
