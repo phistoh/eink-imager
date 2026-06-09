@@ -16,6 +16,7 @@ from einker.metadata import (
     init_db,
     migrate_db,
     set_eink_evaluation,
+    set_image_hash,
 )
 
 logger = logging.getLogger(__name__)
@@ -42,11 +43,16 @@ def prepare_filesystem():
 
 def backfill_feature(feature_name: str) -> None:
     match feature_name:
-        case "hash":
+        case "image_hash":
             images = get_images_with_missing_hash()
             for (image_id,) in images:
-                pass
-                # todo
+                features = extract_all_features(get_image_path_by_id(image_id))
+                set_image_hash(image_id, features["image_hash"])
+                logger.info(
+                    "Backfilled image hash for image %s: %s",
+                    image_id,
+                    features[feature_name],
+                )
         case "color_features":
             images = set()
             images.update(get_images_with_missing_feature("brightness"))
@@ -118,7 +124,7 @@ def initialize():
     prepare_filesystem()
     init_db()
     migrate_db()
-    backfill_feature("hash")
+    backfill_feature("image_hash")
     backfill_feature("color_features")
     backfill_feature("entropy")
     backfill_feature("edge_density")

@@ -25,6 +25,7 @@ from einker.metadata import (
     add_image_color_features,
     add_image_feature,
     set_eink_evaluation,
+    set_image_hash,
 )
 
 logger = logging.getLogger(__name__)
@@ -101,6 +102,8 @@ def process_file(path: Path) -> None:
     )
 
     evaluation = evaluate_eink_suitability(features)
+
+    set_image_hash(new_file_id, features["image_hash"])
 
     if evaluation["status"] == "rejected":
         logger.info(

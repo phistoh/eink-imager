@@ -2,6 +2,7 @@ import colorsys
 import logging
 from pathlib import Path
 
+import imagehash
 from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 
 from einker.confparser import get_config
@@ -63,6 +64,11 @@ def process_image(
 
         result = result.convert("RGB")
         result.save(destination, format="JPEG", quality=95)
+
+
+def image_hash(path: Path) -> str:
+    with Image.open(path) as img:
+        return str(imagehash.phash(img))
 
 
 def extract_color_features(path: Path) -> dict[str, float]:
@@ -150,6 +156,7 @@ def extract_all_features(path: Path) -> dict[str, float]:
         **extract_color_features(path),
         "entropy": entropy(path),
         "edge_density": edge_density(path),
+        "image_hash": image_hash(path),
     }
 
     return features

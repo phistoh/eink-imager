@@ -204,6 +204,24 @@ def set_eink_evaluation(
         )
 
 
+def set_image_hash(
+    image_id: str,
+    image_hash: str,
+) -> None:
+    with get_connection() as conn:
+        conn.execute(
+            """
+            UPDATE images
+            SET image_hash = ?
+            WHERE id = ?
+            """,
+            (
+                image_hash,
+                image_id,
+            ),
+        )
+
+
 def set_daily_images(image_ids: list[str], day: str) -> None:
     with get_connection() as conn:
         for image_id in image_ids:
