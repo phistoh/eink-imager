@@ -142,7 +142,7 @@ def evaluate_eink_suitability(features: dict[str, float]):
     score *= lerp(features.get("edge_density", 0.5), 0.6, 1.2, True)
     score *= lerp(features.get("contrast", 0.5), 0.7, 1.3)
 
-    status = "accepted" if score >= 0.75 else "rejected"
+    status = "accepted" if score >= 0.5 else "rejected"
 
     return {
         "status": status,

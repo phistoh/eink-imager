@@ -153,6 +153,20 @@ def add_image_color_features(image_id: str, features: dict) -> None:
         )
 
 
+def get_image(image_id: str) -> dict | None:
+    with get_connection() as conn:
+        row = conn.execute(
+            """
+            SELECT *
+            FROM images
+            WHERE id = ?
+            """,
+            (image_id,),
+        ).fetchone()
+
+    return dict(row) if row else None
+
+
 def add_image_feature(image_id: str, feature_name: str, feature_value: float) -> None:
     if feature_name not in VALID_FEATURES:
         raise ValueError(f"Unknown feature: {feature_name}")
@@ -177,6 +191,18 @@ def add_image_feature(image_id: str, feature_name: str, feature_value: float) ->
             """,
             (feature_value, FEATURE_VERSION, image_id),
         )
+
+
+def get_all_image_ids() -> list[str]:
+    with get_connection() as conn:
+        rows = conn.execute(
+            """
+            SELECT id
+            FROM images
+            """
+        ).fetchall()
+
+    return [row["id"] for row in rows]
 
 
 def set_eink_evaluation(
@@ -383,3 +409,41 @@ def find_duplicate_images(image_hash: str) -> dict | None:
         ).fetchone()
 
     return dict(row) if row else None
+
+
+def count_images() -> int:
+    with get_connection() as conn:
+        row = conn.execute(
+            """
+            SELECT COUNT(*) AS count
+            FROM images
+            """
+        ).fetchone()
+
+    return row["count"]
+
+
+def count_rejected_images() -> int:
+    with get_connection() as conn:
+        row = conn.execute(
+            """
+            SELECT COUNT(*) AS count
+            FROM images
+            WHERE eink_status = 'rejected'
+            """
+        ).fetchone()
+
+    return row["count"]
+
+
+def count_accepted_images() -> int:
+    with get_connection() as conn:
+        row = conn.execute(
+            """
+            SELECT COUNT(*) AS count
+            FROM images
+            WHERE eink_status = 'accepted'
+            """
+        ).fetchone()
+
+    return row["count"]
