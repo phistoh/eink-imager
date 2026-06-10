@@ -137,12 +137,13 @@ def entropy(path: Path) -> float:
 
 def evaluate_eink_suitability(features: dict[str, float]):
 
-    score = 1.0
-    score *= lerp(features.get("entropy", 0.5), 0.7, 1.2, True)
-    score *= lerp(features.get("edge_density", 0.5), 0.6, 1.2, True)
-    score *= lerp(features.get("contrast", 0.5), 0.7, 1.3)
+    entropy_score = lerp(features.get("entropy", 0.5), 0.7, 1.2, True)
+    edge_density_score = lerp(features.get("edge_density", 0.5), 0.6, 1.2, True)
+    contrast_score = lerp(features.get("contrast", 0.5), 0.7, 1.3)
 
-    status = "accepted" if score >= 0.5 else "rejected"
+    score = (entropy_score + edge_density_score + contrast_score) ** (1 / 3)
+
+    status = "accepted" if score >= 0.85 else "rejected"
 
     return {
         "status": status,
