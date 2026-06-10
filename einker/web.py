@@ -31,18 +31,21 @@ def get_daily_index(n: int) -> int:
     return (hour * n) // 24
 
 
+def current_daily_image(index: int):
+    images = daily_images()
+    return images[index]
+
+
 @app.route("/daily")
 def daily() -> Response:
-    images = daily_images()
     index = get_daily_index(CONFIG.app.images_per_day)
-    return send_file(images[index], conditional=True)
+    return send_file(current_daily_image(index), conditional=True)
 
 
 @app.route("/daily/<int:index>")
 def daily_with_index(index):
-    images = daily_images()
     index = max(0, min(index, CONFIG.app.images_per_day - 1))
-    return send_file(images[index], conditional=True)
+    return send_file(current_daily_image(index), conditional=True)
 
 
 @app.route("/random")
@@ -54,12 +57,25 @@ def random() -> Response:
 @app.route("/")
 @app.route("/daily_view", strict_slashes=False)
 def daily_view():
-    return render_template("daily.html", img_src="/daily")
+    index = get_daily_index(CONFIG.app.images_per_day)
+    image = current_daily_image(index)
+
+    return render_template(
+        "daily.html",
+        img_src="/daily",
+        image_id=image.stem,
+    )
 
 
 @app.route("/daily_view/<int:index>", strict_slashes=False)
 def daily_view_with_index(index):
-    return render_template("daily.html", img_src=f"/daily/{index}")
+    image = current_daily_image(index)
+
+    return render_template(
+        "daily.html",
+        img_src="/daily",
+        image_id=image.stem,
+    )
 
 
 @app.route("/random_view", strict_slashes=False)
