@@ -226,6 +226,7 @@ data/processed/*
 data/incoming/*
 data/failed/*
 data/images/*
+data/weather.json
 .pylintrc
 launch.json
 data/metadata.*

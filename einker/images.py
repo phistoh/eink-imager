@@ -13,6 +13,7 @@ from einker.metadata import (
     set_daily_images,
 )
 from einker.utils import hue_preference, lerp
+from einker.weather import Weather, current_weather
 
 logger = logging.getLogger(__name__)
 
@@ -48,9 +49,38 @@ def cooldown_modifier(image_id: str, today: date) -> float:
     return modifier
 
 
-# TODO
-def weather_modifier(image_id: str, today: date) -> float:
-    modifier = 1
+def weather_modifier(image_id: str) -> float:
+    modifier = 1.0
+
+    weather = current_weather()
+
+    features = get_image_features(image_id)
+
+    brightness = features.get("brightness", 0.5)
+    saturation = features.get("saturation", 0.5)
+    contrast = features.get("contrast", 0.5)
+
+    if weather is Weather.SUNNY:
+        modifier = lerp(brightness, 0.8, 1.2) * lerp(saturation, 0.9, 1.2)
+
+    elif weather is Weather.RAIN:
+        modifier = lerp(brightness, 0.8, 1.1, invert=True) * lerp(
+            saturation, 0.9, 1.1, invert=True
+        )
+
+    elif weather is Weather.FOG:
+        modifier = lerp(contrast, 0.8, 1.2, invert=True)
+
+    elif weather is Weather.SNOW:
+        modifier = lerp(brightness, 0.9, 1.3)
+
+    logger.debug(
+        "Weather=%s image=%s modifier=%.2f",
+        weather.value,
+        image_id,
+        modifier,
+    )
+
     return modifier
 
 
@@ -266,7 +296,7 @@ def compute_weight(img: Path, today: date) -> float:
     weight = 1 / math.sqrt(display_count + 1)
 
     weight *= cooldown_modifier(image_id, today)
-    weight *= weather_modifier(image_id, today)
+    weight *= weather_modifier(image_id)
     weight *= season_modifier(image_id, today)
     weight *= daytime_modifier(image_id)
 

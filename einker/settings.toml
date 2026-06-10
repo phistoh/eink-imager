@@ -16,3 +16,7 @@ edge_threshold = 40
 cache-ttl = 24
 images-per-day = 2
 debug = true
+
+[weather]
+latitude = 49.75
+longitude = 6.64

@@ -19,6 +19,7 @@ from einker.metadata import (
     set_eink_evaluation,
     set_image_hash,
 )
+from einker.weather import update_weather_cache
 
 logger = logging.getLogger(__name__)
 
@@ -131,10 +132,7 @@ def backfill_eink_evaluations() -> None:
         )
 
 
-def initialize():
-    prepare_filesystem()
-    init_db()
-    migrate_db()
+def backfill_features():
     backfill_feature("image_hash")
     backfill_feature("color_features")
     backfill_feature("entropy")
@@ -161,7 +159,17 @@ def ready_check() -> None:
 
 
 def bootstrap():
-    initialize()
+    prepare_filesystem()
+    init_db()
+    migrate_db()
+    backfill_features()
+    try:
+        update_weather_cache()
+    except Exception as e:
+        logger.warning(
+            "Could not update weather cache: %s",
+            e,
+        )
     ready_check()
 
 

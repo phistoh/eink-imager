@@ -41,9 +41,16 @@ class AppConfig:
 
 
 @dataclass
+class WeatherConfig:
+    latitude: float
+    longitude: float
+
+
+@dataclass
 class Config:
     paths: PathsConfig
     images: ImagesConfig
+    weather: WeatherConfig
     app: AppConfig
 
 
@@ -74,6 +81,11 @@ def build_config(raw: dict) -> Config:
         ),
     )
 
+    weather = WeatherConfig(
+        latitude=float(os.getenv("LATITUDE", raw["weather"]["latitude"])),
+        longitude=float(os.getenv("LONGITUDE", raw["weather"]["longitude"])),
+    )
+
     app = AppConfig(
         cache_ttl=raw["app"]["cache-ttl"],
         images_per_day=int(
@@ -82,7 +94,7 @@ def build_config(raw: dict) -> Config:
         debug=raw["app"]["debug"],
     )
 
-    return Config(paths=paths, images=images, app=app)
+    return Config(paths=paths, images=images, weather=weather, app=app)
 
 
 @cache
